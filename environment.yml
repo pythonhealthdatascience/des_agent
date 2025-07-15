@@ -2,12 +2,17 @@ name: des-agent
 channels:
   - conda-forge
 dependencies:
+  - fastmcp
+  - pandas
   - python=3.11
   - jupyterlab
   - pip
+  - numpy
+  - matplotlib
+  - seaborn
+  - simpy
   - pip:
       - langchain
       - langchain-community
       - langchain-core
       - langchain-ollama
-      - requests
