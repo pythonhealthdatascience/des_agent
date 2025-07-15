@@ -1,7 +1,6 @@
 name: des-agent
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python=3.11
   - jupyterlab
@@ -10,4 +9,5 @@ dependencies:
       - langchain
       - langchain-community
       - langchain-core
+      - langchain-ollama
       - requests
