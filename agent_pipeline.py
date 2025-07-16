@@ -3,6 +3,9 @@ from langchain_core.prompts import PromptTemplate
 from fastmcp import Client
 import asyncio
 import json
+import pandas as pd
+
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
 async def fetch_schema():
     """Fetch experiment schema using FastMCP client"""
@@ -56,7 +59,7 @@ async def main(model_name="gemma3:latest"):
     
     # 2. Fetch experiment schema using FastMCP
     schema = await fetch_schema()
-    print("Schema retrieved:", schema)
+    print("Simulation schema retrieved")
     
     # 3. Create LangChain prompt
     PROMPT_TEMPLATE = """
@@ -86,13 +89,22 @@ async def main(model_name="gemma3:latest"):
     JSON Response:
     """
 
-    
     prompt = PromptTemplate.from_template(PROMPT_TEMPLATE)
     chain = prompt | llm
     
     # 4. Example usage
     user_input = "Run with 14 operators and 12 nurses"
-    response = chain.invoke({"schema": schema, "user_input": user_input})
+    # print("Generating simulation parameters...")
+    # response = chain.invoke({"schema": schema, "user_input": user_input})
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold blue]Thinking about model parameters..."),
+        transient=True,  # Removes progress bar after completion
+    ) as progress:
+        task = progress.add_task("thinking", total=None)
+        response = chain.invoke({"schema": schema, "user_input": user_input})
+        progress.remove_task(task)  # Optional, as exiting the context manager stops it
 
     print("LLM response")
     # Clean the response to remove markdown
@@ -101,11 +113,22 @@ async def main(model_name="gemma3:latest"):
 
     # 5. Parse and run simulation
     parameters = json.loads(cleaned_response)
-    print(parameters)
-    result = await run_simulation(parameters)
-    print("Simulation result:", result)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold green]Simulating..."),
+        transient=True,  # Removes progress bar after completion
+    ) as progress:
+        task = progress.add_task("simulating", total=None)
+        result = await run_simulation(parameters)
+        progress.remove_task(task)  # Optional, as exiting the context manager stops it
+    
+    print("Simulation result:")
+    df = pd.DataFrame(result.items(), columns=['KPIs', 'Values']).round(2)
+    print(df)
 
 if __name__ == "__main__":
     #model_name = "gemma3n:e2b"
-    model_name = "deepseek-r1:1.5b"
+    #model_name = "deepseek-r1:1.5b"
+    model_name = "llama3:latest"
     asyncio.run(main(model_name))
