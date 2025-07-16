@@ -14,6 +14,7 @@ import simpy
 import itertools
 import matplotlib.pyplot as plt
 import seaborn as sns
+import inspect
 
 # =============================================================================
 # CONSTANTS AND DEFAULT VALUES
@@ -346,18 +347,28 @@ def set_trace(trace_on=True):
 
 
 def run_simulation_from_dict(params: dict):
-    """Wrapper to run simulation using JSON-style params."""    
-    exp = Experiment(
-        n_operators=params.get("n_operators", 13),
-        n_nurses=params.get("n_nurses", 10),
-        mean_iat=params.get("mean_iat", 60 / 100),
-        call_low=params.get("call_low", 5.0),
-        call_mode=params.get("call_mode", 7.0),
-        call_high=params.get("call_high", 10.0),
-        callback_prob=params.get("callback_prob", 0.4),
-        nurse_consult_low=params.get("nurse_consult_low", 10.0),
-        nurse_consult_high=params.get("nurse_consult_high", 20.0),
-    )
-    run_length = params.get("run_length", 1000)
-    rep_seed = params.get("random_seed", 0)
+    """
+    Wrapper to run the simulation using params supplied in a dictionary.
+    Only the parameters necessary for the Experiment's constructor are passed;
+    defaults are used for those not provided.
+    """
+    # Extract constructor signature of the Experiment class
+    signature = inspect.signature(Experiment.__init__)
+    
+    # Build kwargs dict: match keys in 'params' to Experiment.__init__ params
+    experiment_kwargs = {
+        key: params.get(key, param.default)
+        for key, param in signature.parameters.items()
+        if key != 'self'  # exclude 'self' from constructor
+    }
+
+    # Create Experiment instance with dynamic/default parameters
+    exp = Experiment(**experiment_kwargs)
+
+    # Separate non-constructor parameters
+    run_length = params.get("run_length", RESULTS_COLLECTION_PERIOD)
+    rep_seed = params.get("random_seed", DEFAULT_RND_SET)
+
+    # Run simulation
     return single_run(exp, rep=rep_seed, rc_period=run_length)
+

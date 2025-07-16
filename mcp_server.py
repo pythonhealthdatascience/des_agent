@@ -1,5 +1,7 @@
 # server.py
-from fastmcp import FastMCP  # Correct
+from fastmcp import FastMCP 
+from langchain_core.prompts import PromptTemplate
+from fastmcp.prompts.prompt import PromptMessage, TextContent
 from model import run_simulation_from_dict
 import json
 
@@ -27,6 +29,23 @@ def describe_model() -> str:
         "utilization, and callback rates. You can adjust operator/nurse numbers, call durations, "
         "demand rates, and more. Example: 'Run with 14 operators and 5% extra demand'."
     )
+
+@mcp.prompt(name="parameter_prompt", description="Prompt to turn user input into simulation parameters.")
+def parameter_prompt(schema: str, user_input: str) -> PromptMessage:
+    """Returns a parameterized prompt template read from file."""
+    with open("resources/parameter_prompt.txt", encoding="utf-8") as f:
+        prompt_template_text = f.read()
+
+    # Let LangChain handle formatting properly
+    prompt = PromptTemplate.from_template(prompt_template_text)
+    filled_prompt = prompt.format(schema=schema, user_input=user_input)
+
+    return PromptMessage(
+        role="user",
+        content=TextContent(type="text", text=filled_prompt)
+    )
+
+
 
 if __name__ == "__main__":
     print("Starting MCP server on port 8000")

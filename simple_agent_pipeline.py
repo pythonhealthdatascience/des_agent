@@ -105,10 +105,10 @@ async def main(model_name="gemma3:latest"):
         response = chain.invoke({"schema": schema, "user_input": user_input})
         progress.remove_task(task)  # Optional, as exiting the context manager stops it
 
-    print("LLM response")
-    # Clean the response to remove markdown
+    print("Chosen parameters")
+    # Clean the response to remove markdown if present
     cleaned_response = clean_llm_response(response)
-    print(f"Cleaned response: {cleaned_response}")
+    print(cleaned_response)
 
     # 5. Parse and run simulation
     parameters = json.loads(cleaned_response)
