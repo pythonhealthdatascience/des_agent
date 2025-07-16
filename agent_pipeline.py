@@ -88,15 +88,14 @@ async def main(model_name="gemma3:latest"):
     
     JSON Response:
     """
-
+    
     prompt = PromptTemplate.from_template(PROMPT_TEMPLATE)
     chain = prompt | llm
     
     # 4. Example usage
     user_input = "Run with 14 operators and 12 nurses"
-    # print("Generating simulation parameters...")
-    # response = chain.invoke({"schema": schema, "user_input": user_input})
 
+    # show progress bar...
     with Progress(
         SpinnerColumn(),
         TextColumn("[bold blue]Thinking about model parameters..."),
@@ -114,14 +113,15 @@ async def main(model_name="gemma3:latest"):
     # 5. Parse and run simulation
     parameters = json.loads(cleaned_response)
 
+    # show progress bar...
     with Progress(
         SpinnerColumn(),
         TextColumn("[bold green]Simulating..."),
-        transient=True,  # Removes progress bar after completion
+        transient=True, 
     ) as progress:
         task = progress.add_task("simulating", total=None)
         result = await run_simulation(parameters)
-        progress.remove_task(task)  # Optional, as exiting the context manager stops it
+        progress.remove_task(task) 
     
     print("Simulation result:")
     df = pd.DataFrame(result.items(), columns=['KPIs', 'Values']).round(2)
