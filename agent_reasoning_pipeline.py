@@ -1,3 +1,32 @@
+"""
+Simulation Agent Workflow Module
+
+This module provides an intelligent agent workflow for configuring and running simulation models.
+The agent uses LLM (Large Language Model) reasoning to interpret user requests, select appropriate
+prompt templates, and generate simulation parameters automatically.
+
+Key Features:
+- Automatic prompt selection based on user input
+- LLM-based parameter generation for simulation models
+- FastMCP client integration for server communication
+- Rich progress indicators for user feedback
+- JSON response cleaning and validation
+
+The workflow follows these steps:
+1. User provides a natural language request
+2. Agent selects the most suitable prompt template
+3. LLM generates simulation parameters based on the request
+4. Simulation is executed with the generated parameters
+5. Results are formatted and displayed to the user
+
+Example:
+    Run the simulation with custom staffing levels:
+    
+    >>> asyncio.run(main("llama3:latest"))
+    # User input: "Run with 14 operators and 12 nurses"
+    # Agent automatically configures and runs the simulation
+"""
+
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
 from fastmcp import Client
@@ -6,9 +35,11 @@ import asyncio
 import json
 import pandas as pd
 import re
+from typing import List, Dict, Any, Optional, Union
 
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+# Prompt template for LLM-based prompt selection
 SELECTION_PROMPT_TEMPLATE = """
 You are an assistant that helps select the most suitable prompt template for a user's request from a given list.
 
@@ -29,36 +60,147 @@ prompt_name: <name>
 reason: <reason>
 """
 
-def format_prompt_options(prompt_list, short=False):
-    """Convert MCP prompts into numbered or named options for LLM display."""
+
+def format_prompt_options(prompt_list: List[Any], short: bool = False) -> str:
+    """
+    Convert MCP prompts into numbered or named options for LLM display.
+    
+    This function formats a list of prompt objects into a human-readable string
+    that can be used by the LLM for prompt selection. Each prompt is displayed
+    with its name and description.
+    
+    Parameters
+    ----------
+    prompt_list : List[Any]
+        List of prompt objects containing name and description attributes
+    short : bool, optional
+        If True, displays prompts without numbering (default: False)
+    
+    Returns
+    -------
+    str
+        Formatted string containing all prompts with their descriptions
+        
+    Examples
+    --------
+    >>> prompts = [MockPrompt("config_sim", "Configure simulation parameters")]
+    >>> format_prompt_options(prompts)
+    "1. config_sim: Configure simulation parameters"
+    
+    >>> format_prompt_options(prompts, short=True)
+    "config_sim: Configure simulation parameters"
+    """
     formatted = []
     for i, p in enumerate(prompt_list, 1):
         line = f"{i}. {p.name}: {p.description}" if not short else f"{p.name}: {p.description}"
         formatted.append(line)
     return "\n".join(formatted)
 
-async def fetch_prompts():
-    """Fetch all prompts from the server"""
+
+async def fetch_prompts() -> str:
+    """
+    Fetch all available prompts from the MCP server.
+    
+    Connects to the FastMCP server and retrieves all available prompt templates.
+    The prompts are then formatted into a numbered list suitable for LLM processing.
+    
+    Returns
+    -------
+    str
+        Formatted string containing all available prompts with descriptions
+        
+    Raises
+    ------
+    ConnectionError
+        If unable to connect to the MCP server at localhost:8001
+    """
     async with Client("http://localhost:8001/mcp") as client:
         prompts = await client.list_prompts()
-        # Generate the numbered list for the selection message
         return format_prompt_options(prompts)
 
-async def fetch_schema():
-    """Fetch experiment schema using FastMCP client"""
+
+async def fetch_schema() -> Dict[str, Any]:
+    """
+    Fetch experiment schema from the MCP server.
+    
+    Retrieves the experiment template schema that defines the structure
+    and parameters available for simulation configuration.
+    
+    Returns
+    -------
+    Dict[str, Any]
+        JSON schema dictionary containing experiment parameter definitions
+        
+    Raises
+    ------
+    ConnectionError
+        If unable to connect to the MCP server
+    json.JSONDecodeError
+        If the returned schema is not valid JSON
+    """
     async with Client("http://localhost:8001/mcp") as client:
         result = await client.read_resource("resource://get_experiment_template")
         return json.loads(result[0].text)
 
-async def run_simulation(parameters):
-    """Run simulation using FastMCP client"""
+
+async def run_simulation(parameters: Dict[str, Any]) -> Any:
+    """
+    Execute simulation with the provided parameters.
+    
+    Sends simulation parameters to the MCP server and executes the experiment.
+    The server runs the simulation model and returns the results.
+    
+    Parameters
+    ----------
+    parameters : Dict[str, Any]
+        Dictionary containing simulation parameters (e.g., staffing levels,
+        operational settings, time horizons)
+    
+    Returns
+    -------
+    Any
+        Simulation results data structure containing KPIs and metrics
+        
+    Raises
+    ------
+    ConnectionError
+        If unable to connect to the MCP server
+    ValueError
+        If parameters are invalid or incomplete
+    """
     async with Client("http://localhost:8001/mcp") as client:
-        result = await client.call_tool("run_experiment",  
-                                        {"parameters": parameters})
+        result = await client.call_tool("run_experiment", {"parameters": parameters})
         return result.data
 
-def clean_llm_response(response):
-    """Clean LLM response to extract JSON from markdown blocks"""
+
+def clean_llm_response(response: Optional[str]) -> str:
+    """
+    Clean LLM response to extract JSON from markdown code blocks.
+    
+    Large Language Models often wrap JSON responses in markdown code blocks.
+    This function removes markdown formatting and extracts the JSON content.
+    
+    Parameters
+    ----------
+    response : Optional[str]
+        Raw LLM response that may contain markdown formatting
+    
+    Returns
+    -------
+    str
+        Cleaned JSON string ready for parsing
+        
+    Examples
+    --------
+    >>> clean_llm_response("``````")
+    '{"key": "value"}'
+    
+    >>> clean_llm_response("Some text {\"key\": \"value\"} more text")
+    '{"key": "value"}'
+    
+    >>> clean_llm_response("")
+    '{}'
+    """
     if not response:
         return "{}"
     
@@ -84,27 +226,69 @@ def clean_llm_response(response):
     return response
 
 
-async def main(model_name="gemma3:latest"):
+async def main(model_name: str = "gemma3:latest") -> None:
+    """
+    Main workflow function that orchestrates the entire simulation agent process.
+    
+    This function coordinates the complete workflow from user input to simulation results:
+    1. Connects to the specified LLM model
+    2. Fetches available prompts and lets LLM select the most suitable one
+    3. Retrieves experiment schema and generates simulation parameters
+    4. Executes the simulation and displays results
+    
+    Parameters
+    ----------
+    model_name : str, optional
+        Name of the Ollama model to use for LLM reasoning (default: "gemma3:latest")
+        
+    Returns
+    -------
+    None
+        Function prints results to console and returns None
+        
+    Raises
+    ------
+    ConnectionError
+        If unable to connect to Ollama server or MCP server
+    json.JSONDecodeError
+        If LLM response cannot be parsed as JSON
+    ValueError
+        If no suitable prompt template is found
+        
+    Examples
+    --------
+    >>> asyncio.run(main("llama3:latest"))
+    # Executes full workflow with llama3 model
+    
+    >>> asyncio.run(main("deepseek-r1:1.5b"))
+    # Executes workflow with deepseek model
+    """
+    # Example user input - in practice, this would come from user interface
+    # user_input = "Run with 14 operators and 12 nurses"
 
-    # 0. Example usage
-    user_input = "Run with 14 operators and 12 nurses"
+    from rich.prompt import Prompt
+
+    # Basic prompt with default
+    user_input = Prompt.ask(
+        "Simulation request:", 
+        default="e.g. Run with 14 operators, 12 nurses, and 5% increase in demand.")
     
     # 1. Connect to Ollama model
     llm = OllamaLLM(model=model_name, base_url="http://localhost:11434")
 
-    # 2. List available prompts
+    # 2. Fetch available prompts from MCP server
     prompts = await fetch_prompts()
     
-    # 3. Prompt LLM to choose the prompt to use for the users task.   
+    # 3. Use LLM to select the most appropriate prompt for the user's task
     selection_prompt = PromptTemplate.from_template(SELECTION_PROMPT_TEMPLATE)
     
-    # Fill the prompt selection template
+    # Fill the prompt selection template with available options and user input
     selection_input = selection_prompt.format(
         prompt_options=prompts,
         user_input=user_input 
     )
 
-    # show progress bar...
+    # Show progress indicator while LLM processes prompt selection
     with Progress(
         SpinnerColumn(),
         TextColumn("[bold green]Reviewing available actions..."),
@@ -116,36 +300,37 @@ async def main(model_name="gemma3:latest"):
 
     print(f"Decision:\n {response}\n")
 
+    # Extract the selected prompt name using regex matching
     match = re.search(r"prompt_name:\s*(\w+)", response)
     if match:
         selected_prompt_name = match.group(1)
     else:
-        # no suitable prompt templated.
+        # No suitable prompt template found
         print("I cannot help with this task. Please enter a different query")
         return
     
-    # 4. Fetch experiment schema using FastMCP
+    # 4. Fetch experiment schema from MCP server
     schema = await fetch_schema()
     print("Simulation schema retrieved")
 
-    # 5. Retrieve the prompt template and populate with data
+    # 5. Retrieve the selected prompt template and populate with schema and user input
     async with Client("http://localhost:8001/mcp") as client:
         chosen_prompt = await client.get_prompt(selected_prompt_name, {
             "schema": schema,
             "user_input": user_input
         })
 
-    # At this point, chosen_prompt.content.text is a final ready-to-go message (string)
+    # Extract the prompt text from the response
     prompt_message = chosen_prompt.messages[0]
-    prompt_text = prompt_message.content.text  # Access the text correctly
+    prompt_text = prompt_message.content.text
     
-    # Create the chain: just send the filled prompt as user input
-    chain = llm  # No extra prompt template needed
+    # Create the LLM chain (direct invocation without additional templates)
+    chain = llm
     
-    # Optional: log what's about to be sent to the LLM
-    print("\n🧠 Final prompt to LLM:\n", prompt_text)
+    # Display the final prompt being sent to the LLM
+    # print("\n🧠 Final prompt to LLM:\n", prompt_text)
     
-    # show progress bar...
+    # Show progress indicator while LLM generates parameters
     with Progress(
         SpinnerColumn(),
         TextColumn("[bold blue]Thinking about model parameters..."),
@@ -153,17 +338,17 @@ async def main(model_name="gemma3:latest"):
     ) as progress:
         task = progress.add_task("thinking", total=None)
         response = chain.invoke(prompt_text)
-        progress.remove_task(task)  # Optional, as exiting the context manager stops it
+        progress.remove_task(task)
 
     print("Chosen parameters")
-    # Clean the response to remove markdown if present
+    # Clean the LLM response to remove markdown formatting
     cleaned_response = clean_llm_response(response)
     print(cleaned_response)
 
-    # 7. Parse and run simulation
+    # 7. Parse parameters and execute simulation
     parameters = json.loads(cleaned_response)
 
-    # show progress bar...
+    # Show progress indicator during simulation execution
     with Progress(
         SpinnerColumn(),
         TextColumn("[bold green]Simulating..."),
@@ -173,12 +358,19 @@ async def main(model_name="gemma3:latest"):
         result = await run_simulation(parameters)
         progress.remove_task(task) 
     
+    # Display simulation results in a formatted table
     print("Simulation result:")
     df = pd.DataFrame(result.items(), columns=['KPIs', 'Values']).round(2)
     print(df)
 
+
 if __name__ == "__main__":
-    #model_name = "gemma3n:e2b"
+    # Available model options for testing
+    # model_name = "gemma3n:e2b"
     #model_name = "deepseek-r1:1.5b"
-    model_name = "llama3:latest"
+    #model_name = "llama3:latest"
+    model_name = "gemma3:27b"
+    #model_name = "qwen2-math:7b"
+    
+    # Run the main workflow
     asyncio.run(main(model_name))

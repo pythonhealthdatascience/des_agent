@@ -18,7 +18,7 @@
     "default": 0.6,
     "minimum": 0.1,
     "maximum": 10.0,
-    "description": "Mean time between arrivals (minutes) - 0.1 = 6 calls/min, 10.0 = 1 call/10min"
+    "description": "Mean time between arrivals (minutes) or inter-arrival time. 0.1 = 6 calls/min, 10.0 = 1 call/10min. An increase in demand = a reduction in the inter-arrival time. A reduction in demand = an increase in inter-arrival time"
   },
   "call_low": {
     "type": "float",
