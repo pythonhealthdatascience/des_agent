@@ -20,7 +20,7 @@ def get_experiment_template() -> dict:
         return json.load(f)
 
 # Text description of the model
-@mcp.resource(uri="resource://model_description")
+@mcp.resource(uri="resource://model_description", description="A description of the model embedded in the server. Useful for learning about how to think about learning to use it.")
 def describe_model() -> str:
     return (
         "This is a discrete-event simulation of a healthcare call centre. "
@@ -30,7 +30,7 @@ def describe_model() -> str:
         "demand rates, and more. Example: 'Run with 14 operators and 5% extra demand'."
     )
 
-@mcp.prompt(name="parameter_prompt", description="Prompt to turn user input into simulation parameters.")
+@mcp.prompt(name="parameter_prompt", description="LLM Prompt used to transform an existing user input in a scheme format suitable for the simulation model")
 def parameter_prompt(schema: str, user_input: str) -> PromptMessage:
     """Returns a parameterized prompt template read from file."""
     with open("resources/parameter_prompt.txt", encoding="utf-8") as f:
@@ -46,10 +46,16 @@ def parameter_prompt(schema: str, user_input: str) -> PromptMessage:
     )
 
 
-@mcp.tool()
+@mcp.tool(
+    name="validate_parameters",
+    description="Validate JSON formatted simulation parameters against schema.  This tool allows a user to check if parameters they wish to use are . " \
+    + " valid BEFORE calling the run_experiment tool. This means run-time errors due to parameters are avoided.",
+    tags=["validation", "parameter_check", "pre_run_check"],
+)
 def validate_parameters(parameters: dict) -> dict:
     """
-    Validate simulation parameters against schema.
+    Validate JSON formatted simulation parameters against schema.  This tool allows a user to check if parameters they wish to use are 
+    valid BEFORE calling the run_experiment tool. This means run-time errors due to parameters are avoided.  
     Returns {"is_valid": bool, "errors": [str, ...]}..
     """
     with open("resources/schema.json") as f:
@@ -81,6 +87,5 @@ def validate_parameters(parameters: dict) -> dict:
 
 
 if __name__ == "__main__":
-    print("Starting MCP server on port 8000")
     mcp.run(transport="http", host="127.0.0.1", port=8001, path="/mcp")
 
