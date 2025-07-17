@@ -16,7 +16,7 @@ def run_experiment(parameters: dict) -> dict:
 # JSON schema template to help LLMs construct parameters
 @mcp.resource(uri="resource://get_experiment_template")
 def get_experiment_template() -> dict:
-    with open("schema.json") as f:
+    with open("resources/schema.json") as f:
         return json.load(f)
 
 # Text description of the model
@@ -44,8 +44,6 @@ def parameter_prompt(schema: str, user_input: str) -> PromptMessage:
         role="user",
         content=TextContent(type="text", text=filled_prompt)
     )
-
-
 
 if __name__ == "__main__":
     print("Starting MCP server on port 8000")
