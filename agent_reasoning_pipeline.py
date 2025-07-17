@@ -39,6 +39,9 @@ from typing import List, Dict, Any, Optional, Union
 
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+# prompt for terminal - nothing to do with LLM
+from rich.prompt import Prompt
+
 # Prompt template for LLM-based prompt selection
 SELECTION_PROMPT_TEMPLATE = """
 You are an assistant that helps select the most suitable prompt template for a user's request from a given list.
@@ -173,6 +176,20 @@ async def run_simulation(parameters: Dict[str, Any]) -> Any:
         return result.data
 
 
+
+
+async def validate_params(parameters: Dict[str, Any]) -> (bool, list):
+    """
+    Use the MCP server to check parameters.
+    Returns (is_valid, errors).
+    """
+    async with Client("http://localhost:8001/mcp") as client:
+        result = await client.call_tool("validate_parameters", {"parameters": parameters})
+        # result.data should be your dict: {"is_valid": bool, "errors": [str, ...]}
+        return result.data.get("is_valid", False), result.data.get("errors", [])
+
+
+
 def clean_llm_response(response: Optional[str]) -> str:
     """
     Clean LLM response to extract JSON from markdown code blocks.
@@ -266,7 +283,7 @@ async def main(model_name: str = "gemma3:latest") -> None:
     # Example user input - in practice, this would come from user interface
     # user_input = "Run with 14 operators and 12 nurses"
 
-    from rich.prompt import Prompt
+  
 
     # Basic prompt with default
     user_input = Prompt.ask(
@@ -333,7 +350,7 @@ async def main(model_name: str = "gemma3:latest") -> None:
     # Show progress indicator while LLM generates parameters
     with Progress(
         SpinnerColumn(),
-        TextColumn("[bold blue]Thinking about model parameters..."),
+        TextColumn("[bold blue]Thinking about model parameters 🧠 ..."),
         transient=True,  # Removes progress bar after completion
     ) as progress:
         task = progress.add_task("thinking", total=None)
@@ -348,14 +365,28 @@ async def main(model_name: str = "gemma3:latest") -> None:
     # 7. Parse parameters and execute simulation
     parameters = json.loads(cleaned_response)
 
+
+
     # Show progress indicator during simulation execution
     with Progress(
         SpinnerColumn(),
-        TextColumn("[bold green]Simulating..."),
+        TextColumn("[bold green]Validating parameters and simulating..."),
         transient=True, 
     ) as progress:
         task = progress.add_task("simulating", total=None)
-        result = await run_simulation(parameters)
+
+        # validate parameters
+  
+        is_valid, errors = await validate_params(parameters)
+        if not is_valid:
+            print("Parameter errors found. Terminating early.")
+            for err in errors:
+                print("-", err)
+            return
+        else:
+            # Proceed with simulation
+            result = await run_simulation(parameters)
+
         progress.remove_task(task) 
     
     # Display simulation results in a formatted table
