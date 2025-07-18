@@ -76,6 +76,7 @@ TASK_PLANNING_PROMPT_TEMPLATE = (
     "    - Clearly state the action to perform.\n"
     "    - Explicitly indicate which capability is being used: resource, tool, or prompt (and its name).\n"
     "    - Do NOT reference specific parameter names, fields, or structures unless you have already retrieved them from the appropriate resource.\n"
+    "    - Do NOT include implicit steps. Only make use of tools, resource and prompts available on the server."
     "    - If a step requires information not yet obtained (such as parameter names/types), plan to retrieve it first.\n"
     "    - Briefly explain the purpose of each step.\n\n"
     "Output Format:\n"
@@ -155,47 +156,74 @@ async def fetch_all_features() -> dict:
         prompts = await client.list_prompts()
     return {"tools": tools, "resources": resources, "prompts": prompts}
 
-
 async def create_task_planning_prompt(user_input: str) -> str:
     """
-    Assemble a step-planning prompt for the agent, embedding available tools, resources, and prompts.
-
-    This function asynchronously queries the MCP server for the current set of tools, resources,
-    and prompt templates, then formats a human- and LLM-readable planning prompt using a 
-    globally-defined template string (e.g., TASK_PLANNING_PROMPT_TEMPLATE). The planning prompt 
-    is designed to instruct the agent on how to break down a user request into stepwise actions.
-
-    Parameters
-    ----------
-    user_input : str
-        The user's natural language request or instruction for running or configuring a simulation.
-
-    Returns
-    -------
-    formatted_prompt : str
-        The agent planning prompt containing lists of available MCP capabilities and the user query,
-        ready to be sent to an LLM or agent step planner.
-
-    Examples
-    --------
-    >>> user_input = "Run with 10 operators and double the demand."
-    >>> prompt = await create_task_planning_prompt(user_input)
-    >>> print(prompt)
-    (prints out the planning prompt with tools, resources, prompts, and user input)
+    Assemble a step-planning prompt for the agent, embedding available tools, resources, prompts, and their descriptions.
     """
+
     features = await fetch_all_features()
-    tool_names = [getattr(t, "name", str(t)) for t in features.get("tools", [])]
-    resource_names = [getattr(r, "name", str(r)) for r in features.get("resources", [])]
-    prompt_names = [getattr(p, "name", str(p)) for p in features.get("prompts", [])]
+
+    def format_feature(item):
+        name = getattr(item, "name", str(item))
+        description = getattr(item, "description", "No description")
+        return f"{name}: {description}"
+
+    tool_infos = [format_feature(t) for t in features.get("tools", [])]
+    resource_infos = [format_feature(r) for r in features.get("resources", [])]
+    prompt_infos = [format_feature(p) for p in features.get("prompts", [])]
 
     prompt = PromptTemplate.from_template(TASK_PLANNING_PROMPT_TEMPLATE)
     formatted_prompt = prompt.format(
-        tools="\n".join(tool_names) if tool_names else "None",
-        resources="\n".join(resource_names) if resource_names else "None",
-        prompts="\n".join(prompt_names) if prompt_names else "None",
+        tools="\n".join(tool_infos) if tool_infos else "None",
+        resources="\n".join(resource_infos) if resource_infos else "None",
+        prompts="\n".join(prompt_infos) if prompt_infos else "None",
         user_input=user_input
     )
     return formatted_prompt
+
+
+
+
+# async def create_task_planning_prompt(user_input: str) -> str:
+#     """
+#     Assemble a step-planning prompt for the agent, embedding available tools, resources, and prompts.
+
+#     This function asynchronously queries the MCP server for the current set of tools, resources,
+#     and prompt templates, then formats a human- and LLM-readable planning prompt using a 
+#     globally-defined template string (e.g., TASK_PLANNING_PROMPT_TEMPLATE). The planning prompt 
+#     is designed to instruct the agent on how to break down a user request into stepwise actions.
+
+#     Parameters
+#     ----------
+#     user_input : str
+#         The user's natural language request or instruction for running or configuring a simulation.
+
+#     Returns
+#     -------
+#     formatted_prompt : str
+#         The agent planning prompt containing lists of available MCP capabilities and the user query,
+#         ready to be sent to an LLM or agent step planner.
+
+#     Examples
+#     --------
+#     >>> user_input = "Run with 10 operators and double the demand."
+#     >>> prompt = await create_task_planning_prompt(user_input)
+#     >>> print(prompt)
+#     (prints out the planning prompt with tools, resources, prompts, and user input)
+#     """
+#     features = await fetch_all_features()
+#     tool_names = [getattr(t, "name", str(t)) for t in features.get("tools", [])]
+#     resource_names = [getattr(r, "name", str(r)) for r in features.get("resources", [])]
+#     prompt_names = [getattr(p, "name", str(p)) for p in features.get("prompts", [])]
+
+#     prompt = PromptTemplate.from_template(TASK_PLANNING_PROMPT_TEMPLATE)
+#     formatted_prompt = prompt.format(
+#         tools="\n".join(tool_names) if tool_names else "None",
+#         resources="\n".join(resource_names) if resource_names else "None",
+#         prompts="\n".join(prompt_names) if prompt_names else "None",
+#         user_input=user_input
+#     )
+#     return formatted_prompt
 
 
 
@@ -370,10 +398,12 @@ async def main(model_name: str = "gemma3:latest") -> None:
     llm = OllamaLLM(model=model_name, base_url="http://localhost:11434")
 
     # 2. Fetch available prompts from MCP server
-    prompts = await fetch_prompts()
+    #prompts = await fetch_prompts()
     
     # 3. Plan the task step by step
     planning_prompt = await create_task_planning_prompt(user_input)
+
+    print(planning_prompt)
 
     # Show progress indicator while LLM processes prompt selection
     with Progress(

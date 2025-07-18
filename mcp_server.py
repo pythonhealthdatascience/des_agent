@@ -14,7 +14,7 @@ def run_experiment(parameters: dict) -> dict:
     return run_simulation_from_dict(parameters)
 
 # JSON schema template to help LLMs construct parameters
-@mcp.resource(uri="resource://get_experiment_template")
+@mcp.resource(uri="resource://get_experiment_template", description="Return a list of all of the parameters available in the experiment.  This is provided a JSON list. Needed, for example, by the parameter_prompt prompt.")
 def get_experiment_template() -> dict:
     with open("resources/schema.json") as f:
         return json.load(f)
@@ -30,7 +30,14 @@ def describe_model() -> str:
         "demand rates, and more. Example: 'Run with 14 operators and 5% extra demand'."
     )
 
-@mcp.prompt(name="parameter_prompt", description="LLM Prompt used to transform an existing user input in a scheme format suitable for the simulation model")
+@mcp.prompt(
+    name="parameter_prompt",
+    description=(
+        "Generates a prompt instructing the LLM to convert a user input into a JSON object "
+        "matching the provided JSON schema. 'schema' is a JSON Schema string. 'user_input' "
+        "is the user's freeform input. Returns a formatted prompt message for the LLM."
+    )
+)
 def parameter_prompt(schema: str, user_input: str) -> PromptMessage:
     """Returns a parameterized prompt template read from file."""
     with open("resources/parameter_prompt.txt", encoding="utf-8") as f:

@@ -399,8 +399,8 @@ if __name__ == "__main__":
     # Available model options for testing
     # model_name = "gemma3n:e2b"
     #model_name = "deepseek-r1:1.5b"
-    model_name = "llama3:latest"
-    #model_name = "gemma3:27b"
+    #model_name = "llama3:latest"
+    model_name = "gemma3:27b"
     #model_name = "qwen2-math:7b"
     
     # Run the main workflow
