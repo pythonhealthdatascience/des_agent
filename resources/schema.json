@@ -74,6 +74,6 @@
     "default": 1000,
     "minimum": 100,
     "maximum": 86400,
-    "description": "Simulation runtime (minutes) - max 24 hours"
+    "description": "Simulation runtime (minutes)"
   }
 }

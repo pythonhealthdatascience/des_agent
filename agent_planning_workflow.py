@@ -39,31 +39,30 @@ import re
 from typing import List, Dict, Any, Optional, Union
 
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich import print as rprint#
+from rich.console import Console
+from rich.markdown import Markdown
 
 # prompt for terminal - nothing to do with LLM
 from rich.prompt import Prompt
 
-# Prompt template for LLM-based prompt selection
-SELECTION_PROMPT_TEMPLATE = """
-You are an assistant that helps select the most suitable prompt template for a user's request from a given list.
+PARAMETER_TABLE_TEMPLATE = """
+Given the following JSON object representing parameters updated in a simulation model:
 
-Available prompt options:
-{prompt_options}
+{json_object}
 
-User instruction:
-"{user_input}"
+Task:  
+Convert this JSON object into a Markdown table with two columns: **Parameter** and **Value**. 
+Each key should map to its value on a separate row. 
+Display only the table in clean Markdown format.
+Do NOT include any text before the table such as 'Here is the output:'
+Please add suitable emoji's to the parameter column header.
 
-Your task:
-- Carefully read the user instruction and the available prompt options.
-- Select the prompt that best fits the user's instruction.
-- Output ONLY the name of the most suitable prompt
-- If none are suitable, respond with "None".
+Output
 
-Output format:
-prompt_name: <name>
-reason: <reason>
+**Parameters used in simulation**
+[markdown table]
 """
-
 
 TASK_PLANNING_PROMPT_TEMPLATE = (
     "You are an intelligent assistant that fulfills user simulation requests using MCP server capabilities.\n\n"
@@ -79,6 +78,7 @@ TASK_PLANNING_PROMPT_TEMPLATE = (
     "    - Do NOT reference specific parameter names, fields, or structures unless you have already retrieved them from the appropriate resource.\n"
     "    - Do NOT include implicit steps. Only make use of tools, resource and prompts available on the server."
     "    - If a step requires information not yet obtained (such as parameter names/types), plan to retrieve it first.\n"
+    "    - Always include the word Step when enumerating steps e.g. Step 1:\n"
     "    - Briefly explain the purpose of each step.\n\n"
     "Output Format:\n"
     "Return your plan as a numbered list. For each step, use the following structure:\n\n"
@@ -88,8 +88,6 @@ TASK_PLANNING_PROMPT_TEMPLATE = (
     "- Name: [Exact name from available list]\n"
     "- Rationale: [Brief explanation of why this step is necessary]\n"
 )
-
-
 
 def format_prompt_options(prompt_list: List[Any], short: bool = False) -> str:
     """
@@ -126,29 +124,6 @@ def format_prompt_options(prompt_list: List[Any], short: bool = False) -> str:
         formatted.append(line)
     return "\n".join(formatted)
 
-
-async def fetch_prompts() -> str:
-    """
-    Fetch all available prompts from the MCP server.
-    
-    Connects to the FastMCP server and retrieves all available prompt templates.
-    The prompts are then formatted into a numbered list suitable for LLM processing.
-    
-    Returns
-    -------
-    str
-        Formatted string containing all available prompts with descriptions
-        
-    Raises
-    ------
-    ConnectionError
-        If unable to connect to the MCP server at localhost:8001
-    """
-    async with Client("http://localhost:8001/mcp") as client:
-        prompts = await client.list_prompts()
-        return format_prompt_options(prompts)
-
-
 async def fetch_all_features() -> dict:
     """Fetch all tools, resources, and prompts from the MCP server asynchronously."""
     async with Client("http://localhost:8001/mcp") as client:
@@ -173,6 +148,7 @@ async def create_task_planning_prompt(user_input: str) -> str:
     resource_infos = [format_feature(r) for r in features.get("resources", [])]
     prompt_infos = [format_feature(p) for p in features.get("prompts", [])]
 
+
     prompt = PromptTemplate.from_template(TASK_PLANNING_PROMPT_TEMPLATE)
     formatted_prompt = prompt.format(
         tools="\n".join(tool_infos) if tool_infos else "None",
@@ -182,119 +158,14 @@ async def create_task_planning_prompt(user_input: str) -> str:
     )
     return formatted_prompt
 
-
-
-
-# async def create_task_planning_prompt(user_input: str) -> str:
-#     """
-#     Assemble a step-planning prompt for the agent, embedding available tools, resources, and prompts.
-
-#     This function asynchronously queries the MCP server for the current set of tools, resources,
-#     and prompt templates, then formats a human- and LLM-readable planning prompt using a 
-#     globally-defined template string (e.g., TASK_PLANNING_PROMPT_TEMPLATE). The planning prompt 
-#     is designed to instruct the agent on how to break down a user request into stepwise actions.
-
-#     Parameters
-#     ----------
-#     user_input : str
-#         The user's natural language request or instruction for running or configuring a simulation.
-
-#     Returns
-#     -------
-#     formatted_prompt : str
-#         The agent planning prompt containing lists of available MCP capabilities and the user query,
-#         ready to be sent to an LLM or agent step planner.
-
-#     Examples
-#     --------
-#     >>> user_input = "Run with 10 operators and double the demand."
-#     >>> prompt = await create_task_planning_prompt(user_input)
-#     >>> print(prompt)
-#     (prints out the planning prompt with tools, resources, prompts, and user input)
-#     """
-#     features = await fetch_all_features()
-#     tool_names = [getattr(t, "name", str(t)) for t in features.get("tools", [])]
-#     resource_names = [getattr(r, "name", str(r)) for r in features.get("resources", [])]
-#     prompt_names = [getattr(p, "name", str(p)) for p in features.get("prompts", [])]
-
-#     prompt = PromptTemplate.from_template(TASK_PLANNING_PROMPT_TEMPLATE)
-#     formatted_prompt = prompt.format(
-#         tools="\n".join(tool_names) if tool_names else "None",
-#         resources="\n".join(resource_names) if resource_names else "None",
-#         prompts="\n".join(prompt_names) if prompt_names else "None",
-#         user_input=user_input
-#     )
-#     return formatted_prompt
-
-
-
-async def fetch_schema() -> Dict[str, Any]:
-    """
-    Fetch experiment schema from the MCP server.
-    
-    Retrieves the experiment template schema that defines the structure
-    and parameters available for simulation configuration.
-    
-    Returns
-    -------
-    Dict[str, Any]
-        JSON schema dictionary containing experiment parameter definitions
-        
-    Raises
-    ------
-    ConnectionError
-        If unable to connect to the MCP server
-    json.JSONDecodeError
-        If the returned schema is not valid JSON
-    """
-    async with Client("http://localhost:8001/mcp") as client:
-        result = await client.read_resource("resource://get_experiment_template")
-        return json.loads(result[0].text)
-
-
-async def run_simulation(parameters: Dict[str, Any]) -> Any:
-    """
-    Execute simulation with the provided parameters.
-    
-    Sends simulation parameters to the MCP server and executes the experiment.
-    The server runs the simulation model and returns the results.
-    
-    Parameters
-    ----------
-    parameters : Dict[str, Any]
-        Dictionary containing simulation parameters (e.g., staffing levels,
-        operational settings, time horizons)
-    
-    Returns
-    -------
-    Any
-        Simulation results data structure containing KPIs and metrics
-        
-    Raises
-    ------
-    ConnectionError
-        If unable to connect to the MCP server
-    ValueError
-        If parameters are invalid or incomplete
-    """
-    async with Client("http://localhost:8001/mcp") as client:
-        result = await client.call_tool("run_experiment", {"parameters": parameters})
-        return result.data
-
-
-
-
-async def validate_params(parameters: Dict[str, Any]) -> (bool, list):
-    """
-    Use the MCP server to check parameters.
-    Returns (is_valid, errors).
-    """
-    async with Client("http://localhost:8001/mcp") as client:
-        result = await client.call_tool("validate_parameters", {"parameters": parameters})
-        # result.data should be your dict: {"is_valid": bool, "errors": [str, ...]}
-        return result.data.get("is_valid", False), result.data.get("errors", [])
-
-
+async def fetch_all_feature_maps() -> dict:
+    features = await fetch_all_features()
+    return {
+        "tool_map": {t.name: t for t in features.get("tools", [])},
+        "resource_map": {r.name: r for r in features.get("resources", [])},
+        "prompt_map": {p.name: p for p in features.get("prompts", [])},
+        "features": features,  # optionally include the full raw info
+    }
 
 def clean_llm_response(response: Optional[str]) -> str:
     """
@@ -376,13 +247,78 @@ def parse_llm_plan(plan_text: str):
     return plan
 
 
+async def run_plan(plan_steps, features, llm, user_input):
+    """
+    features: dict as returned by fetch_all_features()
+      { "tools": [...], "resources": [...], "prompts": [...] }
+    Each entry should have at least .name (string) and tools/resources have .uri if needed.
+    """
+    memory = {"user_input": user_input}
 
-async def main(model_name: str = "gemma3:latest") -> None:
+    # Index features by name for lookup
+    tool_map = {t.name: t for t in features["tools"]}
+    resource_map = {r.name: r for r in features["resources"]}
+    prompt_map = {p.name: p for p in features["prompts"]}
+
+    async with Client("http://localhost:8001/mcp") as client:
+        for step, step_i in zip(plan_steps, range(len(plan_steps))):
+            
+
+            step_action = step["action"].strip().lower()
+            step_type = step["type"].strip().lower()
+            step_name = step["name"].strip()
+
+            print(f"Executing step {step_i}: {step_action}")
+
+            if step_type == "resource":
+                resource = resource_map[step_name]
+                # Typically, resource should have .uri (or .name, but .uri is canonical)
+                result = await client.read_resource(resource.uri)
+                # Usually result is a list of ResponseItem, take 0th and .text or .json()
+                value = result[0].text if hasattr(result[0], "text") else result[0]
+                memory[step_name] = value
+
+            elif step_type == "tool":
+                tool = tool_map[step_name]
+                # Tools typically need named arguments as dict
+                if step_name == "validate_simulation_parameters":
+                    params = memory["parameters"]
+                    result = await client.call_tool(tool.name, {"parameters": params})
+                    memory["validation"] = result.data
+                elif step_name == "run_call_centre_simulation":
+                    params = memory["parameters"]
+                    result = await client.call_tool(tool.name, {"parameters": params})
+                    memory["simulation_result"] = result.data
+                else:
+                    result = await client.call_tool(tool.name)
+                    memory[step_name] = result.data
+
+            elif step_type == "prompt":
+                
+                prompt = prompt_map[step_name]
+                # Most prompts need schema, user input
+                schema = memory.get("get_experiment_parameter_schema")
+                result = await client.get_prompt(
+                    prompt.name,
+                    {"schema": schema, "user_input": user_input}
+                )
+                llm_prompt_text = result.messages[0].content.text
+                # Actually run LLM (synchronously!)
+                llm_result = llm.invoke(llm_prompt_text)
+                parameters = json.loads(clean_llm_response(llm_result))
+                memory["parameters"] = parameters
+
+    return memory
+
+async def main(
+        planning_model_name: str = "gemma3:latest",
+        summarising_model_name: str = "gemma3n:e4b"    
+) -> None:
     """
     Main workflow function that orchestrates the entire simulation agent process.
     
     This function coordinates the complete workflow from user input to simulation results:
-    1. Connects to the specified LLM model
+    1. Connects to the specified LLM model for planning and summarising...
     2. Fetches available prompts and lets LLM select the most suitable one
     3. Retrieves experiment schema and generates simulation parameters
     4. Executes the simulation and displays results
@@ -414,23 +350,24 @@ async def main(model_name: str = "gemma3:latest") -> None:
     >>> asyncio.run(main("deepseek-r1:1.5b"))
     # Executes workflow with deepseek model
     """
-    # Example user input - in practice, this would come from user interface
-    # user_input = "Run with 14 operators and 12 nurses"
-
+    console = Console()
 
     # Basic prompt with default
     user_input = Prompt.ask(
         "Simulation request:", 
-        default="e.g. Run with 14 operators, 12 nurses, and 5% increase in demand.")
+        default="e.g. Simulate 14 operators, 12 nurses, and 5% increase in demand.")
     
     # 1. Connect to Ollama model
-    llm = OllamaLLM(model=model_name, base_url="http://localhost:11434")
+    llm = OllamaLLM(model=planning_model_name, base_url="http://localhost:11434")
 
     # 2. Fetch available prompts from MCP server
     #prompts = await fetch_prompts()
     
     # 3. Plan the task step by step
     planning_prompt = await create_task_planning_prompt(user_input)
+
+    # store tools, resources and prompts for later...
+    features = await fetch_all_features()
 
     # print(planning_prompt)
 
@@ -444,121 +381,53 @@ async def main(model_name: str = "gemma3:latest") -> None:
         response = llm.invoke(planning_prompt)
         progress.remove_task(task)  
 
-    print(" ################# LLM planning response ###############\n")
-    print(response)
+    #print(response)
 
-    print(" ################ Extracted Plan #####################\n")
-    plan = parse_llm_plan(response)
-    for item in plan:
-        print(item)
+    # extract the plan from the LLM response
+    plan_steps = parse_llm_plan(response)
     
-    # # 3. Use LLM to select the most appropriate prompt for the user's task
-    # selection_prompt = PromptTemplate.from_template(SELECTION_PROMPT_TEMPLATE)
-    
-    # # Fill the prompt selection template with available options and user input
-    # selection_input = selection_prompt.format(
-    #     prompt_options=prompts,
-    #     user_input=user_input 
-    # )
+    # 4. Run the plan
+    # Show progress indicator while plan is running
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold yellow]⚙️  Executing the plan..."),
+        transient=True,  # Removes progress bar after completion
+    ) as progress:
+        task = progress.add_task("executing", total=None)
+        memory = await run_plan(plan_steps, features, llm, user_input)
+        progress.remove_task(task)  
+     
 
-    # # Show progress indicator while LLM processes prompt selection
-    # with Progress(
-    #     SpinnerColumn(),
-    #     TextColumn("[bold green]Reviewing available actions..."),
-    #     transient=True,  # Removes progress bar after completion
-    # ) as progress:
-    #     task = progress.add_task("reviewing", total=None)
-    #     response = llm.invoke(selection_input)
-    #     progress.remove_task(task)  
+    llm = OllamaLLM(model=summarising_model_name, base_url="http://localhost:11434")
 
-    # print(f"Decision:\n {response}\n")
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold green]🧠 Summarising parameters used..."),
+        transient=True,  # Removes progress bar after completion
+    ) as progress:
+        task = progress.add_task("summarising", total=None)
+        prompt = PromptTemplate.from_template(PARAMETER_TABLE_TEMPLATE)
+        param_display_prompt = prompt.format(json_object=memory["parameters"])
+        llm_result = llm.invoke(param_display_prompt)
+        progress.remove_task(task)  
+        
+    console.print(Markdown(llm_result))   
 
-    # # Extract the selected prompt name using regex matching
-    # match = re.search(r"prompt_name:\s*(\w+)", response)
-    # if match:
-    #     selected_prompt_name = match.group(1)
-    # else:
-    #     # No suitable prompt template found
-    #     print("I cannot help with this task. Please enter a different query")
-    #     return
-    
-    # # 4. Fetch experiment schema from MCP server
-    # schema = await fetch_schema()
-    # print("Simulation schema retrieved")
-
-    # # 5. Retrieve the selected prompt template and populate with schema and user input
-    # async with Client("http://localhost:8001/mcp") as client:
-    #     chosen_prompt = await client.get_prompt(selected_prompt_name, {
-    #         "schema": schema,
-    #         "user_input": user_input
-    #     })
-
-    # # Extract the prompt text from the response
-    # prompt_message = chosen_prompt.messages[0]
-    # prompt_text = prompt_message.content.text
-    
-    # # Create the LLM chain (direct invocation without additional templates)
-    # chain = llm
-    
-    # # Display the final prompt being sent to the LLM
-    # # print("\n🧠 Final prompt to LLM:\n", prompt_text)
-    
-    # # Show progress indicator while LLM generates parameters
-    # with Progress(
-    #     SpinnerColumn(),
-    #     TextColumn("[bold blue]Thinking about model parameters 🧠 ..."),
-    #     transient=True,  # Removes progress bar after completion
-    # ) as progress:
-    #     task = progress.add_task("thinking", total=None)
-    #     response = chain.invoke(prompt_text)
-    #     progress.remove_task(task)
-
-    # print("Chosen parameters")
-    # # Clean the LLM response to remove markdown formatting
-    # cleaned_response = clean_llm_response(response)
-    # print(cleaned_response)
-
-    # # 7. Parse parameters and execute simulation
-    # parameters = json.loads(cleaned_response)
-
-
-
-    # # Show progress indicator during simulation execution
-    # with Progress(
-    #     SpinnerColumn(),
-    #     TextColumn("[bold green]Validating parameters and simulating..."),
-    #     transient=True, 
-    # ) as progress:
-    #     task = progress.add_task("simulating", total=None)
-
-    #     # validate parameters
-  
-    #     is_valid, errors = await validate_params(parameters)
-    #     if not is_valid:
-    #         print("Parameter errors found. Terminating early.")
-    #         for err in errors:
-    #             print("-", err)
-    #         return
-    #     else:
-    #         # Proceed with simulation
-    #         result = await run_simulation(parameters)
-
-    #     progress.remove_task(task) 
-    
-    # # Display simulation results in a formatted table
-    # print("Simulation result:")
-    # df = pd.DataFrame(result.items(), columns=['KPIs', 'Values']).round(2)
-    # print(df)
+    # Display simulation results in a formatted table
+    console.print(Markdown("✅ **Simulation complete.**")) 
+    df = pd.DataFrame(list(memory["simulation_result"].items()), columns=['KPIs', 'Values'])
+    console.print(Markdown(df.round(2).to_markdown()))   
 
 
 if __name__ == "__main__":
     # Available model options for testing
-    model_name = "gemma3n:e4b"
+    #model_name = "gemma3n:e4b"
     #model_name = "deepseek-r1:32b"
     #model_name = "llama3:latest"
-    #model_name = "llama3.1:8b"
+    model_name = "llama3.1:8b"
     #model_name = "gemma3:27b"
+    #model_name = "gemma3:27b-it-qat"
     #model_name = "qwen2-math:7b"
     #model_name = "mistral:7b"
     # Run the main workflow
-    asyncio.run(main(model_name))
+    asyncio.run(main(model_name, "llama3.1:8b"))
