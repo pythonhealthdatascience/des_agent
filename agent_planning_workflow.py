@@ -3,7 +3,7 @@ Simulation Agent Workflow Module
 
 This module provides an intelligent agent workflow for configuring and running simulation models.
 The agent uses LLM (Large Language Model) reasoning to interpret user requests, select appropriate
-prompt templates, and generate simulation parameters automatically.
+tools, resources and prompt templates, and generate simulation parameters automatically.
 
 Key Features:
 - Automatic prompt selection based on user input
@@ -27,6 +27,7 @@ Example:
     # Agent automatically configures and runs the simulation
 """
 
+# agent.py
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
 from fastmcp import Client
@@ -348,6 +349,34 @@ def clean_llm_response(response: Optional[str]) -> str:
     return response
 
 
+def parse_llm_plan(plan_text: str):
+    """
+    Converts a step-by-step plan output from an LLM into a list of dicts.
+    """
+    # Split by step (supports "Step N" or "Step N:")
+    steps = re.split(r'\s*Step \d+:', plan_text)
+    steps = [s.strip() for s in steps if s.strip()]   # Remove empties
+
+    plan = []
+    item_regex = {
+        'action': r"- Action:\s*(.*)",
+        'type': r"- Type:\s*(.*)",
+        'name': r"- Name:\s*(.*)",
+        'rationale': r"- Rationale:\s*(.*)",
+    }
+
+    for step in steps:
+        entry = {}
+        for key, regex in item_regex.items():
+            match = re.search(regex, step, flags=re.IGNORECASE)
+            if match:
+                entry[key] = match.group(1).strip()
+        if entry:
+            plan.append(entry)
+    return plan
+
+
+
 async def main(model_name: str = "gemma3:latest") -> None:
     """
     Main workflow function that orchestrates the entire simulation agent process.
@@ -403,7 +432,7 @@ async def main(model_name: str = "gemma3:latest") -> None:
     # 3. Plan the task step by step
     planning_prompt = await create_task_planning_prompt(user_input)
 
-    print(planning_prompt)
+    # print(planning_prompt)
 
     # Show progress indicator while LLM processes prompt selection
     with Progress(
@@ -415,8 +444,14 @@ async def main(model_name: str = "gemma3:latest") -> None:
         response = llm.invoke(planning_prompt)
         progress.remove_task(task)  
 
+    print(" ################# LLM planning response ###############\n")
     print(response)
 
+    print(" ################ Extracted Plan #####################\n")
+    plan = parse_llm_plan(response)
+    for item in plan:
+        print(item)
+    
     # # 3. Use LLM to select the most appropriate prompt for the user's task
     # selection_prompt = PromptTemplate.from_template(SELECTION_PROMPT_TEMPLATE)
     
@@ -518,11 +553,11 @@ async def main(model_name: str = "gemma3:latest") -> None:
 
 if __name__ == "__main__":
     # Available model options for testing
-    # model_name = "gemma3n:e2b"
-    #model_name = "deepseek-r1:8b"
+    model_name = "gemma3n:e4b"
+    #model_name = "deepseek-r1:32b"
     #model_name = "llama3:latest"
     #model_name = "llama3.1:8b"
-    model_name = "gemma3:27b"
+    #model_name = "gemma3:27b"
     #model_name = "qwen2-math:7b"
     #model_name = "mistral:7b"
     # Run the main workflow
