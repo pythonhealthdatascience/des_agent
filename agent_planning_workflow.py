@@ -406,8 +406,10 @@ async def run_plan(
 
 async def main(
         planning_model_name: str = "gemma3:latest",
-        summarising_model_name: str = "gemma3n:e4b"    
+        summarising_model_name: str = "gemma3n:e4b",
+        debug_mode: bool = False
 ) -> None:
+
     """
     Main workflow function that orchestrates the entire simulation agent process.
     
@@ -444,6 +446,18 @@ async def main(
     >>> asyncio.run(main("deepseek-r1:1.5b"))
     # Executes workflow with deepseek model
     """
+    # Setup logging
+    #logger = setup_logging(debug_mode)
+    
+    # Enable asyncio debug mode if debugging
+    # if debug_mode:
+    #     import os
+    #     os.environ["PYTHONASYNCIODEBUG"] = "1"
+    #     loop = asyncio.get_running_loop()
+    #     loop.set_debug(True)
+    #     logger.debug("AsyncIO debug mode enabled")
+    #     logger.debug(f"Using planning model: {planning_model_name}")
+    #     logger.debug(f"Using summary model: {summarising_model_name}")
     console = Console()
 
     # Basic prompt with default
@@ -518,7 +532,7 @@ def parse_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
             Examples:
-            python agent_planning_workflow.py -p gemma3:27b -s llama3.1:8b
+            python agent_planning_workflow.py -p gemma3:27b -s gemma3:27b
             python agent_planning_workflow.py --planning deepseek-r1:32b --summary llama3.1:8b
             python agent_planning_workflow.py --debug  # Uses default models with debug enabled
             python agent_planning_workflow.py -p gemma3:27b -s llama3.1:8b -d  # Custom models with debug
@@ -528,8 +542,8 @@ def parse_arguments():
     parser.add_argument(
         '-p', '--planning',
         type=str,
-        default='gemma3:latest',
-        help='Model to use for reasoning and planning (default: gemma3:latest)'
+        default='gemma3:27b',
+        help='Model to use for reasoning and planning (default:gemma3:27b)'
     )
     
     parser.add_argument(
@@ -564,5 +578,5 @@ if __name__ == "__main__":
     # Parse command line arguments
     args = parse_arguments()
     
-    # Run the main workflow
-    asyncio.run(main(args.planning, args.summary))
+    # Run the main workflow with debug mode if specified
+    asyncio.run(main(args.planning, args.summary, debug_mode=args.debug))
