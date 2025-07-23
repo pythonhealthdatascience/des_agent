@@ -12,6 +12,7 @@ dependencies:
   - seaborn
   - simpy
   - tabulate
+  - langgraph
   - pip:
       - langchain
       - langchain-community
