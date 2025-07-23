@@ -27,7 +27,6 @@ Example:
     # Agent automatically configures and runs the simulation
 """
 
-# agent.py
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
 from fastmcp import Client
@@ -42,9 +41,10 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich import print as rprint#
 from rich.console import Console
 from rich.markdown import Markdown
-
 # prompt for terminal - nothing to do with LLM
 from rich.prompt import Prompt
+
+import argparse
 
 PARAMETER_TABLE_TEMPLATE = """
 Given the following JSON object representing parameters updated in a simulation model:
@@ -468,6 +468,35 @@ async def main(
     df = pd.DataFrame(list(memory["simulation_result"].items()), columns=['KPIs', 'Values'])
     console.print(Markdown(df.round(2).to_markdown()))   
 
+def parse_arguments():
+    """Parse command line arguments for model selection."""
+    parser = argparse.ArgumentParser(
+        description="Simulation Agent Workflow - Run AI agent with custom models",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+            Examples:
+            python agent_planning_workflow.py -p gemma3:27b -s llama3.1:8b
+            python agent_planning_workflow.py --planning deepseek-r1:32b --summary llama3.1:8b
+            python agent_planning_workflow.py  # Uses default models
+                    """
+    )
+    
+    parser.add_argument(
+        '-p', '--planning',
+        type=str,
+        default='gemma3:latest',
+        help='Model to use for reasoning and planning (default: gemma3:latest)'
+    )
+    
+    parser.add_argument(
+        '-s', '--summary',
+        type=str,
+        default='gemma3n:e4b',
+        help='Model to use for summarizing parameters (default: gemma3n:e4b)'
+    )
+    
+    return parser.parse_args()
+
 
 if __name__ == "__main__":
     # Available model options for testing
@@ -476,8 +505,12 @@ if __name__ == "__main__":
     #model_name = "llama3:latest"
     #model_name = "llama3.1:8b"
     #model_name = "gemma3:27b"
-    model_name = "gemma3:27b-it-qat"
+    #model_name = "gemma3:27b-it-qat"
     #model_name = "qwen2-math:7b"
     #model_name = "mistral:7b"
+
+    # Parse command line arguments
+    args = parse_arguments()
+    
     # Run the main workflow
-    asyncio.run(main(model_name, "llama3.1:8b"))
+    asyncio.run(main(args.planning, args.summary))
