@@ -1,31 +1,48 @@
 """
 Simulation Agent Workflow Module
 
-This module provides an intelligent agent workflow for configuring and running simulation models.
-The agent uses LLM (Large Language Model) reasoning to interpret user requests, select appropriate
-tools, resources and prompt templates, and generate simulation parameters automatically.
+This module provides an intelligent agent workflow for configuring and running simulation models
+using a sophisticated task planning approach. The agent employs dual LLM (Large Language Model) 
+architecture to create execution plans, generate simulation parameters, and summarize results 
+automatically.
 
 Key Features:
-- Automatic prompt selection based on user input
-- LLM-based parameter generation for simulation models
-- FastMCP client integration for server communication
-- Rich progress indicators for user feedback
+- Task planning with LLM-generated step-by-step execution plans
+- Dual LLM architecture (separate reasoning and summarizing models)
+- Command line interface with model selection (--reasoning/-r, --summary/-s)
+- FastMCP client integration for dynamic server communication
+- Rich progress indicators and formatted console output
 - JSON response cleaning and validation
+- Dynamic plan execution with memory storage between steps
+- Automatic parameter generation, validation, and simulation execution
 
 The workflow follows these steps:
-1. User provides a natural language request
-2. Agent selects the most suitable prompt template
-3. LLM generates simulation parameters based on the request
-4. Simulation is executed with the generated parameters
-5. Results are formatted and displayed to the user
+1. User provides a natural language request via command line interface
+2. Agent connects to specified LLM models (reasoning and summary)
+3. Agent fetches available tools, resources, and prompts from MCP server
+4. Reasoning LLM generates a detailed step-by-step execution plan
+5. Agent executes the plan dynamically (resource queries, parameter generation, simulation)
+6. Summary LLM formats parameters and results are displayed in structured tables
 
-Example:
-    Run the simulation with custom staffing levels:
+Architecture:
+- Planning Model: Handles task decomposition and execution planning
+- Summary Model: Formats parameters and results for display
+- MCP Integration: Dynamic discovery and execution of server capabilities
+- Memory System: Maintains state between execution steps
+
+Examples:
+    Run with default models:
+    >>> python agent_planning_workflow.py
     
-    >>> asyncio.run(main("llama3:latest"))
+    Run with custom models:
+    >>> python agent_planning_workflow.py -r llama3:latest -s gemma3:27b
+    >>> python agent_planning_workflow.py --reasoning deepseek-r1:32b --summary llama3.1:8b
+    
+    Interactive usage:
     # User input: "Run with 14 operators and 12 nurses"
-    # Agent automatically configures and runs the simulation
+    # Agent automatically plans, configures and runs the simulation
 """
+
 
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
@@ -38,7 +55,6 @@ import re
 from typing import List, Dict, Any, Optional, Union
 
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich import print as rprint#
 from rich.console import Console
 from rich.markdown import Markdown
 # prompt for terminal - nothing to do with LLM
