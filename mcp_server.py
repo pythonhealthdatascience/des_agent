@@ -140,30 +140,36 @@ Returns: PromptMessage (LLM input) guiding the agent to produce valid JSON param
 
 Tags: ["jsonification", "schema_mapping", "prompt", "parameters"]
 """)
-def parameter_jsonification_prompt(schema: str, user_input: str) -> PromptMessage:
-    """
-    Create an LLM prompt for mapping a user's request to a simulation parameter JSON.
-
-    Parameters
-    ----------
-    schema : str
-        JSON schema (as a string) describing expected parameters.
-    user_input : str
-        User's freeform simulation request.
-
-    Returns
-    -------
-    PromptMessage
-        Prompt for LLM to generate a valid parameters JSON according to the schema.
-    """
+def parameter_jsonification_prompt(
+    schema: str, 
+    user_input: str,
+    validation_errors: str = ""
+) -> PromptMessage:
     with open("resources/parameter_prompt.txt", encoding="utf-8") as f:
         prompt_template_text = f.read()
     prompt = PromptTemplate.from_template(prompt_template_text)
-    filled_prompt = prompt.format(schema=schema, user_input=user_input)
+
+    # manage validation error str if not ""
+    if validation_errors and validation_errors.strip():
+        validation_feedback = (
+            "**Validation Feedback:**\n"
+            "Your last attempt did not pass validation for these reasons:\n"
+            f"{validation_errors}\n\n"
+            "Please address the issues above and try again."
+        )
+    else:
+        validation_feedback = ""
+
+    filled_prompt = prompt.format(
+        schema=schema, 
+        user_input=user_input,
+        validation_feedback=validation_feedback
+    )
     return PromptMessage(
         role="user",
         content=TextContent(type="text", text=filled_prompt)
     )
+
 
 @mcp.tool(
     name="validate_simulation_parameters",

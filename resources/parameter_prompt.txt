@@ -6,6 +6,8 @@ Here is the simulation configuration schema:
 
 User request: {user_input}
 
+{validation_feedback}
+
 IMPORTANT:
 - Return ONLY the parameter VALUES, not the schema structure
 - Use the exact parameter names from the schema

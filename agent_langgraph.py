@@ -17,6 +17,9 @@ import pandas as pd
 
 console = Console()
 
+# maximum tries are jsonifying parameter list...
+MAX_RETRIES = 3
+
 PARAMETER_TABLE_TEMPLATE = """
 Given the following JSON object representing parameters updated in a simulation model:
 
@@ -43,6 +46,7 @@ class AgentState(TypedDict):
     formatted_parameters: str
     validation: Optional[dict]
     simulation_result: Optional[dict]
+    retry_count: int  
 
 # --------------------------- Helper funcs ---------------------------------------- #
 def clean_llm_response(response: Optional[str]) -> str:
@@ -111,24 +115,42 @@ async def fetch_schema(state: Dict[str, Any]) -> Dict[str, Any]:
 
 async def generate_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str, Any]:
     async with Client("http://localhost:8001/mcp") as cl:
+
+        # prompt parameters
+        prompt_vars = {
+            "schema": state["schema"],
+            "user_input": state["user_input"]
+        }
+        # include validation errors if present in state memory
+        validation_errors = state.get("validation", {}).get("errors")
+        if validation_errors:
+            prompt_vars["validation_errors"] = "\n".join(f"- {e}" for e in validation_errors)
+        else:
+            prompt_vars["validation_errors"] = ""  # always supply a string
+
         # Ask MCP for the ready-made prompt that tells an LLM how to jsonify
-        prompt_resp = await cl.get_prompt(
-            "parameter_jsonification_prompt",
-            {"schema": state["schema"], "user_input": state["user_input"]},
-        )
+        prompt_resp = await cl.get_prompt("parameter_jsonification_prompt", prompt_vars)
         
     prompt_text = prompt_resp.messages[0].content.text
     
+    progress_text = "[bold green]🧠 Reasoning about simulation parameters."
+    if state["retry_count"] > 0:
+        progress_text += f"[RETRY {state['retry_count']}]"
     with Progress(
         SpinnerColumn(),
-        TextColumn("[bold green]🧠 Reasoning about simulation parameters..."),
-        transient=True,  # Removes progress bar after completion
+        TextColumn(progress_text),
+        transient=True,  
     ) as progress:
         task = progress.add_task("summarising", total=None)
         llm_out = llm.invoke(prompt_text)
         progress.remove_task(task)
     
-    state["parameters"] = json.loads(clean_llm_response(llm_out))
+    try:
+        state["parameters"] = json.loads(clean_llm_response(llm_out))
+    except: 
+        console.print(llm_out)
+        import sys
+        sys.exit()
     return state
 
 
@@ -141,10 +163,25 @@ async def validate_parameters(state: Dict[str, Any]) -> Dict[str, Any]:
     state["validation"] = resp.data
     return state
 
-
 def validation_branch(state: Dict[str, Any]) -> str:
     return "valid" if state["validation"]["is_valid"] else "invalid"
 
+def retry_branch(state: AgentState) -> str:
+    """routing node.  bail out if max retries exceeded otherwise jsonify"""
+    if state.get("retry_count", 0) >= MAX_RETRIES:
+        return "bail_out"
+    return "jsonify"
+
+def increment_retry(state: AgentState) -> AgentState:
+    """Increment the number of attempts at jsonifying parameters"""
+    state["retry_count"] = state.get("retry_count", 0) + 1
+    report_parameter_reflection_failure(state, MAX_RETRIES)
+    return state
+
+def bail_out_node(state: AgentState) -> AgentState:
+    """A bail out node if exceeded max attempts at jsonifying parameters"""
+    state["error"] = "Maximum retries exceeded during parameter reflection."
+    return state
 
 async def run_simulation(state: Dict[str, Any]) -> Dict[str, Any]:
     async with Client("http://localhost:8001/mcp") as cl:
@@ -157,9 +194,11 @@ async def run_simulation(state: Dict[str, Any]) -> Dict[str, Any]:
 
 
 async def summarise_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str, Any]:
+    
+    progress_text = "[bold blue]✏️ Summarising parameters used..."
     with Progress(
         SpinnerColumn(),
-        TextColumn("[bold blue]✏️ Summarising parameters used..."),
+        TextColumn(progress_text),
         transient=True,  
     ) as progress:
         task = progress.add_task("summarising_params", total=None)
@@ -182,6 +221,8 @@ def build_graph(llm: OllamaLLM) -> StateGraph:
     graph.add_node("validate", validate_parameters)
     graph.add_node("run_sim", run_simulation)
     graph.add_node("format_params", partial(summarise_parameters, llm=llm))
+    graph.add_node("increment_retry", increment_retry)
+    graph.add_node("bail_out", bail_out_node)
 
     # 2. create entry point and edges
     graph.set_entry_point("get_schema")
@@ -190,10 +231,20 @@ def build_graph(llm: OllamaLLM) -> StateGraph:
     graph.add_conditional_edges(
         "validate",
         validation_branch,
-        {"valid": "format_params", "invalid": END}
+        {"valid": "format_params", "invalid": "increment_retry"}
     )
+
+    # handles limited number of retrries. links to bail_out (and END) 
+    # if retries exceeds a hard limit.
+    graph.add_conditional_edges(
+        "increment_retry",
+        retry_branch,
+        {"jsonify": "jsonify", "bail_out": "bail_out"}
+    )  
+    
     graph.add_edge("format_params", "run_sim")
     graph.add_edge("run_sim", END)
+    graph.add_edge("bail_out", END)
     
     return graph.compile()
 
@@ -215,6 +266,28 @@ def display_param_summary_table(state: AgentState):
     console.print(Markdown(state["formatted_parameters"]))
 
 
+def report_parameter_reflection_failure(state: dict, max_retries: int):
+    """
+    Display a clear error message for parameter reflection failure
+    """
+    retry_count = state.get("retry_count", 0)
+    console.print(
+        f"[bold red]❌ Parameter validation failed after {retry_count} attempt{'s' if retry_count!=1 else ''}."
+    )
+    if "validation" in state and "errors" in state["validation"]:
+        errors = state["validation"]["errors"]
+        if errors:
+            console.print("[red]Last validation errors were:")
+            for err in errors:
+                console.print(f"[red]- {err}")
+        else:
+            console.print("[red]No specific validation errors were provided by the server.")
+    else:
+        console.print("[red]No validation error details are available.")
+        console.print(f"[yellow]The agent was unable to generate valid simulation parameters in {retry_count} tries (limit: {max_retries}).")
+        console.print("[yellow]Try rephrasing your request or ensure parameter values are within allowed ranges. Refer to the simulation parameter schema for guidance.")
+
+
 async def main(model_name: str) -> None:
 
     # 1. Setup the graph and LLM
@@ -228,7 +301,10 @@ async def main(model_name: str) -> None:
     )
 
     # 3. invoke graph
-    final_state = await compiled_graph.ainvoke({"user_input": user_request})
+    final_state = await compiled_graph.ainvoke({
+        "user_input": user_request,
+        "retry_count": 0     # initialize retries
+    })
 
     # 4. Report results
     console.rule("[bold green]RESULTS")
@@ -236,10 +312,26 @@ async def main(model_name: str) -> None:
         display_param_summary_table(final_state)
         display_results_table(final_state)
     else:
-        console.print("[red]❌ Parameter validation failed")
-        console.print_json(data=final_state["validation"])
+        retry_count = final_state.get("retry_count", 0)
+        if retry_count >= MAX_RETRIES:
+            report_parameter_reflection_failure(final_state, MAX_RETRIES)
+        else:
+            console.print("[red]❌ Parameter validation failed")
+            if "validation" in final_state:
+                console.print_json(data=final_state["validation"])
+
+
 
 if __name__ == "__main__":
+    #model_name = "gemma3n:e4b"
+    # model_name = "deepseek-r1:32b"
+    #model_name = "llama3:latest"
+    # model_name = "llama3.1:8b"
+    # model_name = "gemma3:27b"
+    # model_name = "gemma3:27b-it-qat"
+    # model_name = "qwen2-math:7b"
+    # model_name = "mistral:7b"
+
     model_name = "gemma3:27b"
     asyncio.run(main(model_name))
 
