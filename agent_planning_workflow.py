@@ -110,25 +110,50 @@ TASK_PLANNING_PROMPT_TEMPLATE = (
 )
 
 def setup_logging(debug_mode: bool = False):
-    """Configure logging based on debug mode."""
-    # Set logging level based on debug mode
-    level = logging.DEBUG if debug_mode else logging.INFO
-    
-    # Configure Rich logging handler for better formatting
-    logging.basicConfig(
-        level=level,
-        format="%(message)s",
-        datefmt="[%X]",
-        handlers=[RichHandler(rich_tracebacks=True)]
-    )
-    
-    # Create logger for the application
-    logger = logging.getLogger(__name__)
-    
+    """Configure logging to show debug information for the agent."""
     if debug_mode:
-        logger.info("🐛 Debug mode enabled.")
+        # Create a custom logger for our application only
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        
+        # Create a simple console handler without Rich formatting noise
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('🐛 %(message)s')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        
+        # Suppress noisy third-party loggers
+        logging.getLogger("httpx").setLevel(logging.WARNING)
+        logging.getLogger("httpcore").setLevel(logging.WARNING)
+        logging.getLogger("urllib3").setLevel(logging.WARNING)
+        
+        logger.debug("Debug mode enabled - showing workflow details")
+        return logger
+    else:
+        # Suppress all debug logging in normal mode
+        logging.getLogger().setLevel(logging.WARNING)
+        return logging.getLogger(__name__)
+
+
+
+def debug_print_available_features(features: dict, logger):
+    """Print available MCP features in debug mode."""
+    logger.debug("=== MCP SERVER CAPABILITIES ===")
     
-    return logger
+    tools = [t.name for t in features.get("tools", [])]
+    resources = [r.name for r in features.get("resources", [])]
+    prompts = [p.name for p in features.get("prompts", [])]
+    
+    logger.debug(f"🔧 Available tools ({len(tools)}): {', '.join(tools)}")
+    logger.debug(f"📚 Available resources ({len(resources)}): {', '.join(resources)}")
+    logger.debug(f"📝 Available prompts ({len(prompts)}): {', '.join(prompts)}")
+
+def debug_print_plan(plan_steps: List[Dict[str, str]], logger):
+    """Print the LLM-generated plan in debug mode."""
+    logger.debug("=== LLM GENERATED PLAN ===")
+    for i, step in enumerate(plan_steps, 1):
+        logger.debug(f"Step {i}: {step.get('action', 'N/A')}")
+        logger.debug(f"  → Type: {step.get('type', 'N/A')}, Name: {step.get('name', 'N/A')}")
 
 
 
@@ -294,7 +319,8 @@ async def run_plan(
     plan_steps: List[Dict[str, str]],
     features: Dict[str, List[Any]],
     llm: Any,
-    user_input: str
+    user_input: str,
+    debug_mode: bool = False
 ) -> Dict[str, Any]:
     """
     Execute a stepwise LLM-generated simulation workflow plan.
@@ -447,17 +473,12 @@ async def main(
     # Executes workflow with deepseek model
     """
     # Setup logging
-    #logger = setup_logging(debug_mode)
+    logger = setup_logging(debug_mode)
     
-    # Enable asyncio debug mode if debugging
-    # if debug_mode:
-    #     import os
-    #     os.environ["PYTHONASYNCIODEBUG"] = "1"
-    #     loop = asyncio.get_running_loop()
-    #     loop.set_debug(True)
-    #     logger.debug("AsyncIO debug mode enabled")
-    #     logger.debug(f"Using planning model: {planning_model_name}")
-    #     logger.debug(f"Using summary model: {summarising_model_name}")
+    if debug_mode:
+        logger.debug(f"Planning model: {planning_model_name}")
+        logger.debug(f"Summary model: {summarising_model_name}")
+
     console = Console()
 
     # Basic prompt with default
@@ -474,7 +495,8 @@ async def main(
     # store tools, resources and prompts for later...
     features = await fetch_all_features()
 
-    # print(planning_prompt)
+    if debug_mode:
+        debug_print_available_features(features, logger)
 
     # Show progress indicator while LLM processes prompt selection
     with Progress(
@@ -482,14 +504,20 @@ async def main(
         TextColumn("[bold green]🧠 Planning modelling task..."),
         transient=True, 
     ) as progress:
-        task = progress.add_task("reviewing", total=None)
+        task = progress.add_task("planning", total=None)
         response = llm.invoke(planning_prompt)
         progress.remove_task(task)  
 
-    #print(response)
-
     # extract the plan from the LLM response
     plan_steps = parse_llm_plan(response)
+
+
+    if debug_mode:
+        logger.debug("=== LLM PLANNING RESPONSE ===")
+        logger.debug(f"Response length: {len(response)} characters")
+        logger.debug("Response preview:")
+        logger.debug(response[:500] + "..." if len(response) > 500 else response)
+        debug_print_plan(plan_steps, logger)      
     
     # 3. Run the plan
     # Show progress indicator while plan is running
@@ -549,7 +577,7 @@ def parse_arguments():
     parser.add_argument(
         '-s', '--summary',
         type=str,
-        default='gemma3n:e4b',
+        default='llama3:latest',
         help='Model to use for summarizing parameters (default: gemma3n:e4b)'
     )
     
