@@ -59,8 +59,12 @@ from rich.console import Console
 from rich.markdown import Markdown
 # prompt for terminal - nothing to do with LLM
 from rich.prompt import Prompt
+from rich.logging import RichHandler
 
 import argparse
+import logging
+import os
+
 
 PARAMETER_TABLE_TEMPLATE = """
 Given the following JSON object representing parameters updated in a simulation model:
@@ -104,6 +108,29 @@ TASK_PLANNING_PROMPT_TEMPLATE = (
     "- Name: [Exact name from available list]\n"
     "- Rationale: [Brief explanation of why this step is necessary]\n"
 )
+
+def setup_logging(debug_mode: bool = False):
+    """Configure logging based on debug mode."""
+    # Set logging level based on debug mode
+    level = logging.DEBUG if debug_mode else logging.INFO
+    
+    # Configure Rich logging handler for better formatting
+    logging.basicConfig(
+        level=level,
+        format="%(message)s",
+        datefmt="[%X]",
+        handlers=[RichHandler(rich_tracebacks=True)]
+    )
+    
+    # Create logger for the application
+    logger = logging.getLogger(__name__)
+    
+    if debug_mode:
+        logger.info("🐛 Debug mode enabled.")
+    
+    return logger
+
+
 
 def format_prompt_options(prompt_list: List[Any], short: bool = False) -> str:
     """
@@ -493,8 +520,9 @@ def parse_arguments():
             Examples:
             python agent_planning_workflow.py -p gemma3:27b -s llama3.1:8b
             python agent_planning_workflow.py --planning deepseek-r1:32b --summary llama3.1:8b
-            python agent_planning_workflow.py  # Uses default models
-                    """
+            python agent_planning_workflow.py --debug  # Uses default models with debug enabled
+            python agent_planning_workflow.py -p gemma3:27b -s llama3.1:8b -d  # Custom models with debug
+            """
     )
     
     parser.add_argument(
@@ -511,7 +539,15 @@ def parse_arguments():
         help='Model to use for summarizing parameters (default: gemma3n:e4b)'
     )
     
+    # Add the debug flag
+    parser.add_argument(
+        '-d', '--debug',
+        action='store_true',
+        help='Enable debug mode with verbose output and detailed logging'
+    )
+    
     return parser.parse_args()
+
 
 
 if __name__ == "__main__":
