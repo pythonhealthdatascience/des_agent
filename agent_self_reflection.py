@@ -1,4 +1,4 @@
-# simulation_graph_agent.py
+# agent_self_reflection.py
 import asyncio, json, re
 from typing import Dict, Any, Optional, TypedDict
 
@@ -14,6 +14,8 @@ from rich.markdown import Markdown
 from functools import partial
 
 import pandas as pd
+
+import argparse
 
 console = Console()
 
@@ -365,6 +367,27 @@ async def main(model_name: str) -> None:
     if retry_count > 0:
         display_validation_history(final_state)
 
+def parse_arguments():
+    """Parse command line arguments for model selection."""
+    parser = argparse.ArgumentParser(
+        description="Simulation Agent Workflow - Experiment with a simulation model using natural language",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+            Examples:
+            python agent_self_reasoning.py -l gemma3:27b
+            python agent_self_reasoning.py -l mistral:7b 
+            """,
+    )
+
+    parser.add_argument(
+        "-l",
+        "--llm",
+        type=str,
+        default="gemma3:27b",
+        help="Model to use for generating parameters (default:gemma3:27b)",
+    )
+
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
@@ -378,13 +401,15 @@ if __name__ == "__main__":
     #model_name = "deepseek-r1:32b"
     #model_name = "llama3:latest"
     #model_name = "llama3.1:8b"
-    model_name = "gemma3:27b"
+    #model_name = "gemma3:27b"
     # model_name = "gemma3:27b-it-qat"
     #model_name = "qwen2-math:7b"
     #model_name = "mistral:7b"
 
-    #model_name = "gemma3:27b"
-    asyncio.run(main(model_name))
+    # Parse command line arguments
+    args = parse_arguments()
+
+    asyncio.run(main(model_name=args.llm))
 
 
 
