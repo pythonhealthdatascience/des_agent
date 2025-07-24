@@ -69,11 +69,14 @@ def clean_llm_response(response: Optional[str]) -> str:
 
     Examples
     --------
-    >>> clean_llm_response("``````")
-    '{"key": "value"}'
+    >>> clean_llm_response("```{'key':'value'}```")
+    "{'key': 'value'}"
 
-    >>> clean_llm_response("Some text {\"key\": \"value\"} more text")
-    '{"key": "value"}'
+    >>> clean_llm_response("```json{'key':'value'}```")
+    "{'key': 'value'}"
+
+    >>> clean_llm_response("Some text {'key':value'} more text")
+    "{'key': 'value'}"
 
     >>> clean_llm_response("")
     '{}'
