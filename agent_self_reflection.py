@@ -18,7 +18,7 @@ import pandas as pd
 console = Console()
 
 # maximum tries are jsonifying parameter list...
-MAX_RETRIES = 3
+MAX_RETRIES = 4
 
 PARAMETER_TABLE_TEMPLATE = """
 Given the following JSON object representing parameters updated in a simulation model:
@@ -45,6 +45,7 @@ class AgentState(TypedDict):
     parameters: dict
     formatted_parameters: str
     validation: Optional[dict]
+    validation_history: list 
     simulation_result: Optional[dict]
     retry_count: int  
 
@@ -130,7 +131,7 @@ async def generate_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str
 
         # Ask MCP for the ready-made prompt that tells an LLM how to jsonify
         prompt_resp = await cl.get_prompt("parameter_jsonification_prompt", prompt_vars)
-        
+       
     prompt_text = prompt_resp.messages[0].content.text
     
     progress_text = "[bold green]🧠 Reasoning about simulation parameters."
@@ -145,12 +146,20 @@ async def generate_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str
         llm_out = llm.invoke(prompt_text)
         progress.remove_task(task)
     
+    cleaned_response = clean_llm_response(llm_out)
+
     try:
-        state["parameters"] = json.loads(clean_llm_response(llm_out))
-    except: 
-        console.print(llm_out)
-        import sys
-        sys.exit()
+        state["parameters"] = json.loads(cleaned_response)
+    except json.JSONDecodeError as e:
+        # Force validation failure by setting invalid parameters
+        # and create a mock validation response for self-reflection
+        state["parameters"] = {"__json_parse_error__": True}
+        console.print(f"[yellow]⚠️ JSON parsing failed - will retry with feedback")
+    except Exception as e:
+        # Handle other unexpected errors similarly
+        state["parameters"] = {"__unexpected_error__": True}
+        console.print(f"[yellow]⚠️ Unexpected error - will retry")
+
     return state
 
 
@@ -160,6 +169,18 @@ async def validate_parameters(state: Dict[str, Any]) -> Dict[str, Any]:
             "validate_simulation_parameters",
             {"parameters": state["parameters"]},
         )
+
+    # Add current validation to history before overwriting
+    if "validation_history" not in state:
+        state["validation_history"] = []
+    
+    # Store the validation attempt with context
+    state["validation_history"].append({
+        "attempt": state.get("retry_count", 0) + 1,
+        "parameters": state["parameters"].copy(),
+        "validation_result": resp.data.copy()
+    })
+
     state["validation"] = resp.data
     return state
 
@@ -194,7 +215,8 @@ async def run_simulation(state: Dict[str, Any]) -> Dict[str, Any]:
 
 
 async def summarise_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str, Any]:
-    
+    """Generates a formatted markdown table of parameters from JSON. 
+    Could do this programatically, but just for fun we will use a LLM"""
     progress_text = "[bold blue]✏️ Summarising parameters used..."
     with Progress(
         SpinnerColumn(),
@@ -265,7 +287,6 @@ def display_param_summary_table(state: AgentState):
     """
     console.print(Markdown(state["formatted_parameters"]))
 
-
 def report_parameter_reflection_failure(state: dict, max_retries: int):
     """
     Display a clear error message for parameter reflection failure
@@ -288,6 +309,30 @@ def report_parameter_reflection_failure(state: dict, max_retries: int):
         console.print("[yellow]Try rephrasing your request or ensure parameter values are within allowed ranges. Refer to the simulation parameter schema for guidance.")
 
 
+def display_validation_history(state: AgentState):
+    """Display the history of validation attempts"""
+    history = state.get("validation_history", [])
+    
+    if not history:
+        return
+        
+    console.print(Markdown("🔍 **Parameter Generation Issues**"))
+    
+    for entry in history:
+        attempt_num = entry["attempt"]
+        is_valid = entry["validation_result"]["is_valid"]
+        errors = entry["validation_result"]["errors"]
+        
+        status = "✅ Success" if is_valid else "❌ Failed"
+        console.print(f"\n**Attempt {attempt_num}:** {status}")
+        
+        if errors:
+            console.print("Errors encountered:")
+            for error in errors:
+                console.print(f"{error}")
+
+
+
 async def main(model_name: str) -> None:
 
     # 1. Setup the graph and LLM
@@ -303,7 +348,8 @@ async def main(model_name: str) -> None:
     # 3. invoke graph
     final_state = await compiled_graph.ainvoke({
         "user_input": user_request,
-        "retry_count": 0     # initialize retries
+        "retry_count": 0,     
+        "validation_history": []
     })
 
     # 4. Report results
@@ -311,28 +357,30 @@ async def main(model_name: str) -> None:
     if "simulation_result" in final_state:
         display_param_summary_table(final_state)
         display_results_table(final_state)
-    else:
-        retry_count = final_state.get("retry_count", 0)
-        if retry_count >= MAX_RETRIES:
-            report_parameter_reflection_failure(final_state, MAX_RETRIES)
-        else:
-            console.print("[red]❌ Parameter validation failed")
-            if "validation" in final_state:
-                console.print_json(data=final_state["validation"])
+    
+    retry_count = final_state.get("retry_count", 0)
+    if retry_count > 0:
+        display_validation_history(final_state)
 
 
 
 if __name__ == "__main__":
-    #model_name = "gemma3n:e4b"
-    # model_name = "deepseek-r1:32b"
-    #model_name = "llama3:latest"
-    # model_name = "llama3.1:8b"
-    # model_name = "gemma3:27b"
-    # model_name = "gemma3:27b-it-qat"
-    # model_name = "qwen2-math:7b"
-    # model_name = "mistral:7b"
 
+    # TM notes: mistral:7b can fail and successed with reflection (or 2nd go)
+    # qwen2:math:7b is not suitable
+    # gemma3:27b both variants work well
+    # deepseek-r1:32b is too slow on 4080
+
+    #model_name = "gemma3n:e4b"
+    #model_name = "deepseek-r1:32b"
+    #model_name = "llama3:latest"
+    #model_name = "llama3.1:8b"
     model_name = "gemma3:27b"
+    # model_name = "gemma3:27b-it-qat"
+    #model_name = "qwen2-math:7b"
+    #model_name = "mistral:7b"
+
+    #model_name = "gemma3:27b"
     asyncio.run(main(model_name))
 
 

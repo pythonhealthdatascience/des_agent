@@ -204,6 +204,7 @@ def validate_simulation_parameters(parameters: dict) -> dict:
         schema = json.load(f)
     errors = []
     for key, value in parameters.items():
+        # catch hallucinated parameters
         if key not in schema:
             errors.append(f"Unknown parameter: {key}")
             continue
