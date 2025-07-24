@@ -267,11 +267,14 @@ def clean_llm_response(response: Optional[str]) -> str:
 
     Examples
     --------
-    >>> clean_llm_response("``````")
-    '{"key": "value"}'
+    >>> clean_llm_response("```{'key':'value'}```")
+    "{'key': 'value'}"
 
-    >>> clean_llm_response("Some text {\"key\": \"value\"} more text")
-    '{"key": "value"}'
+    >>> clean_llm_response("```json{'key':'value'}```")
+    "{'key': 'value'}"
+
+    >>> clean_llm_response("Some text {'key':value'} more text")
+    "{'key': 'value'}"
 
     >>> clean_llm_response("")
     '{}'
@@ -582,7 +585,7 @@ async def main(
 def parse_arguments():
     """Parse command line arguments for model selection."""
     parser = argparse.ArgumentParser(
-        description="Simulation Agent Workflow - Run AI agent with custom models",
+        description="Simulation Agent Workflow - Experiment with a simulation model using natural",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
             Examples:
