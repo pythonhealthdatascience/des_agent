@@ -1,4 +1,56 @@
-# agent_self_reflection.py
+"""
+Agent Self-Reflection Simulation Parameter Generator
+
+This module implements an simple agent that generates and validates simulation 
+parameters using natural language input and self-reflection capabilities. The agent 
+employs a graph-based workflow to iteratively refine parameters until they meet 
+validation requirements.
+
+Overview
+--------
+The agent uses a state machine architecture built with LangGraph to orchestrate 
+the parameter generation process. When validation fails, the agent reflects on 
+the errors and attempts to correct them through multiple retry cycles.
+
+Core Workflow
+-------------
+1. Schema Retrieval: Fetch parameter schema from MCP server
+2. Parameter Generation: Use LLM to convert natural language to JSON parameters  
+3. Validation: Validate parameters against schema constraints
+4. Self-Reflection: On validation failure, analyze errors and retry
+5. Simulation Execution: Run simulation with validated parameters
+6. Results Display: Present formatted results and parameter summaries
+
+Usage
+-----
+Run from command line with optional model specification:
+
+    $ python agent_self_reflection.py --llm gemma3:27b
+    $ python agent_self_reflection.py --llm mistral:7b
+
+The agent will prompt for a natural language simulation description and 
+automatically handle parameter generation, validation, and execution.
+
+Hard constraints
+-------------
+MAX_RETRIES : int
+    Maximum number of parameter generation attempts before bailout (default: 4)
+
+Examples
+--------
+Natural language inputs the agent can process:
+- "Simulate 14 operators, 12 nurses and 5% extra demand"
+- "Run scenario with high staffing and normal call volume"
+- "Test configuration with minimal staff"
+
+Notes
+-----
+Requires running MCP server on localhost:8001 and Ollama server on localhost:11434.
+Different LLM models show varying performance - gemma3:27b and mistral:7b are 
+recommended for reliable parameter generation.
+
+"""
+
 import asyncio, json, re
 from typing import Dict, Any, Optional, TypedDict
 
@@ -37,6 +89,7 @@ Please add a graph emoji to the parameter column header.
 Output
 
 **Parameters used in simulation**
+
 [markdown table]
 """
 
