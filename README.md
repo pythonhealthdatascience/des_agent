@@ -106,7 +106,9 @@ This project was developed and tested on the following system configuration:
    # Using mamba (recommended)
    mamba env create -f environment.yml
    mamba activate des-agent
-   
+   ```
+
+   ```bash
    # Or using pip
    pip install fastmcp pandas simpy langgraph langchain langchain-ollama rich
    ```
