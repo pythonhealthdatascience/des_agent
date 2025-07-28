@@ -4,7 +4,7 @@
 
 An intelligent agent system that demonstrates reasoning patterns for simulation experimentation through the **Model Content Protocol (MCP)**. This project showcases two agent architectures—**self-reflection** and **task planning**—applied to a healthcare call centre optimization problem.
 
-<img src="./images/des_agent_architecture.png" alt="drawing" width="500"/>
+<img src="images/agent_self_reflect_demo.gif" width="600" alt="Demo animation">
 
 ## 🎯 Overview
 
@@ -21,6 +21,8 @@ This pilot project explores how AI agents can autonomously discover, configure, 
 ## 🏗️ Architecture
 
 The system consists of three main layers connected through the Model Content Protocol:
+
+<img src="./images/des_agent_architecture.png" alt="drawing" width="500"/>
 
 ### 🤖 Agent Layer
 Two complementary agent architectures demonstrate different reasoning approaches:
