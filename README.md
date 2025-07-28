@@ -242,7 +242,7 @@ Both agents leverage the full Model Content Protocol specification:
 ## 📊 Results & Outputs
 
 ### Simulation Metrics
-The healthcare model provides comprehensive performance analytics:
+The healthcare model provides the following performance metrics:
 
 | Metric | Description | Use Case |
 |--------|-------------|----------|
