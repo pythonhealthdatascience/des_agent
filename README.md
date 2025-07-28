@@ -13,7 +13,7 @@ This pilot project explores how AI agents can autonomously discover, configure, 
 ### Key Innovations
 
 - **🧠 Self-Reflection Agent**: Uses LangGraph state machines to iteratively refine parameters through validation feedback loops
-- **📋 Planning Agent**: Employs LanChain and a dual-LLM architecture for task decomposition and execution planning  
+- **📋 Planning Agent**: Employs LangChain and a dual-LLM architecture for task decomposition and execution planning  
 - **🔄 MCP Integration**: Uses the Model Content Protocol for standardized tool and resource access to the simulation model
 - **⚡ Intelligent Parameter Generation**: Converts natural language to structured simulation parameters with validation
 - **🎯 Application**: Healthcare call centre optimization with nurse callback modeling
