@@ -283,7 +283,7 @@ This project demonstrates several cutting-edge research areas:
 ### Multi-Agent Orchestration
 - **👥 Agent Collaboration**: Multiple agents working together on complex experiments
 - **🎯 Specialized Roles**: Planning, execution, analysis, and reporting agents
-- **🔄 Workflow Coordination**: Advanced orchestration patterns for simulation campaigns
+- **🔄 Workflow Coordination**: Advanced orchestration patterns for simulation studiea
 
 ### Advanced Simulation Features
 - **🏥 Multi-Model Support**: Integration with diverse simulation domains beyond healthcare
