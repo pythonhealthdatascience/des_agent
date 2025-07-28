@@ -1,0 +1,40 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0" version="27.1.6">
+  <diagram name="Page-1" id="T2d-czowhcJVc50-VPyA">
+    <mxGraphModel dx="3270" dy="1658" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="JDpvP1YvU1Z9Ml0P-cID-3" value="&lt;span style=&quot;color: rgb(0, 127, 255);&quot;&gt;&amp;nbsp; &amp;nbsp; USER LAYER&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Tahoma;fontSize=27;fillColor=#b1ddf0;strokeColor=none;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="-636" y="-317" width="1155" height="187" as="geometry" />
+        </mxCell>
+        <mxCell id="JDpvP1YvU1Z9Ml0P-cID-1" value="&lt;div&gt;&lt;b&gt;Natural Language Request&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;e.g. &quot;simulate a 10% increase in demand&quot;&lt;/b&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Tahoma;fontSize=16;strokeColor=#0000CC;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-393" y="-258" width="307" height="96" as="geometry" />
+        </mxCell>
+        <mxCell id="JDpvP1YvU1Z9Ml0P-cID-2" value="&lt;b&gt;Language Model Selection (Ollama)&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Tahoma;fontSize=16;strokeColor=#0000CC;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-37" y="-258" width="307" height="96" as="geometry" />
+        </mxCell>
+        <mxCell id="JDpvP1YvU1Z9Ml0P-cID-4" value="&lt;span style=&quot;color: rgb(255, 51, 51);&quot;&gt;&amp;nbsp; &amp;nbsp; AGENT LAYER (MCP Client)&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Tahoma;fontSize=27;fillColor=#f8cecc;strokeColor=none;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="-636" y="-116" width="1155" height="215" as="geometry" />
+        </mxCell>
+        <mxCell id="JDpvP1YvU1Z9Ml0P-cID-5" value="&lt;div&gt;&lt;b&gt;Planning Agent (LangChain)&lt;/b&gt;&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;&lt;ul&gt;&lt;li&gt;Dual LLM architect&lt;/li&gt;&lt;li&gt;Task Planning&lt;/li&gt;&lt;li&gt;Param generation&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Tahoma;fontSize=16;strokeColor=#FF3333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-609" y="-62" width="534" height="151" as="geometry" />
+        </mxCell>
+        <mxCell id="JDpvP1YvU1Z9Ml0P-cID-6" value="&lt;div&gt;&lt;b&gt;Self-Reflection Agent (LangGraph)&lt;/b&gt;&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;&lt;ul&gt;&lt;li&gt;State Machine&lt;/li&gt;&lt;li&gt;Self-Validation&lt;/li&gt;&lt;li&gt;Retry Logic&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Tahoma;fontSize=16;strokeColor=#FF3333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-46" y="-62" width="538" height="151" as="geometry" />
+        </mxCell>
+        <mxCell id="JDpvP1YvU1Z9Ml0P-cID-7" value="&lt;span style=&quot;color: rgb(0, 138, 0);&quot;&gt;&amp;nbsp; &amp;nbsp; MCP SERVER LAYER&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Tahoma;fontSize=27;fillColor=#d5e8d4;strokeColor=none;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="-636" y="118" width="1155" height="184" as="geometry" />
+        </mxCell>
+        <mxCell id="JDpvP1YvU1Z9Ml0P-cID-8" value="&lt;div&gt;&lt;b&gt;FastMCP Server&lt;/b&gt;&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;&lt;ul&gt;&lt;li&gt;Tools: run simulation, validate params&lt;/li&gt;&lt;li&gt;Resources: schema, docs&lt;/li&gt;&lt;li&gt;Prompts: param generation&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Tahoma;fontSize=16;strokeColor=#008A00;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-500" y="174" width="888" height="114" as="geometry" />
+        </mxCell>
+        <mxCell id="JDpvP1YvU1Z9Ml0P-cID-9" value="&amp;nbsp; &amp;nbsp; &lt;span style=&quot;color: rgb(106, 0, 255);&quot;&gt;SIMULATION LAYER&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Tahoma;fontSize=27;fillColor=#e1d5e7;strokeColor=none;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="-633.5" y="320" width="1155" height="209" as="geometry" />
+        </mxCell>
+        <mxCell id="JDpvP1YvU1Z9Ml0P-cID-10" value="&lt;div&gt;&lt;b&gt;Healthcare Urgent Care Call Centre Model (Python, SimPy)&lt;/b&gt;&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;&lt;ul&gt;&lt;li&gt;Discrete-event simulation&lt;/li&gt;&lt;li&gt;Stochastic arrivals, task durations and patient routing&lt;/li&gt;&lt;li&gt;Multiple waiting time, queuing, and resource utilisation metrics for operators + nurses&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Tahoma;fontSize=16;strokeColor=#9933FF;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-502.5" y="381" width="888" height="114" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
