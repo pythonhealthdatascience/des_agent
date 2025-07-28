@@ -118,7 +118,6 @@ This project was developed and tested on the following system configuration:
    ollama pull llama3:latest  # Good for summarization
    ollama pull mistral:7b     # Potentially faster alternative for self-reflection
    ```
-   ```
 
 ### Quick Start
 
