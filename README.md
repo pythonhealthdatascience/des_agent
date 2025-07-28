@@ -4,7 +4,7 @@
 
 An intelligent agent system that demonstrates reasoning patterns for simulation experimentation through the **Model Content Protocol (MCP)**. This project showcases two agent architectures—**self-reflection** and **task planning**—applied to a healthcare call centre optimization problem.
 
-[image:1]
+<img src="./images/des_agent_architecture.png" alt="drawing" width="500"/>
 
 ## 🎯 Overview
 
@@ -94,7 +94,7 @@ Two complementary agent architectures demonstrate different reasoning approaches
 3. **Set up Ollama models**
    ```bash
    # Install recommended models
-   ollama pull gemma3:27b     # Best performance for planning
+   ollama pull gemma3:27b     # Best performance for planning and parameter generation
    ollama pull llama3:latest  # Good for summarization
    ollama pull mistral:7b     # Potentially faster alternative for self-reflection
    ```
@@ -126,8 +126,7 @@ Two complementary agent architectures demonstrate different reasoning approaches
 ## 💡 Usage Examples
 
 ### Self-Reflection Agent
-The self-reflection agent demonstrates advanced error recovery and learning:
-
+The self-reflection agent demonstrates error recovery and learning:
 ```bash
 python agent_self_reflection.py --llm gemma3:27b
 ```
@@ -136,6 +135,8 @@ python agent_self_reflection.py --llm gemma3:27b
 - `"Simulate 14 operators, 12 nurses and 5% extra demand"`
 - `"Run scenario with high staffing and normal call volume"`  
 - `"Test configuration with minimal staff"`
+
+<img src="./images/simple_agent_self_reflection.png" alt="drawing" width="300"/>
 
 **Key Features:**
 - ✅ **Automatic Parameter Validation**: Catches invalid parameters and self-corrects
@@ -282,7 +283,7 @@ This project welcomes contributions in several areas:
 - **🛠️ MCP Extensions**: New tools, resources, and capabilities
 - **📊 Analysis Features**: Enhanced result interpretation and visualization
 
-## 📚 References & Related Work
+<!-- ## 📚 References & Related Work
 
 This project builds upon and demonstrates several key research areas:
 
@@ -290,7 +291,7 @@ This project builds upon and demonstrates several key research areas:
 - **LangGraph**: [Agent Workflow Orchestration](https://langchain-ai.github.io/langgraph/)
 - **SimPy**: [Discrete Event Simulation in Python](https://simpy.readthedocs.io/)
 - **Self-Reflection in AI**: [Reflexion Framework](https://arxiv.org/abs/2303.11366)
-- **Agent Planning**: [Task Decomposition and Planning](https://research.csiro.au/ss/science/projects/agent-design-pattern-catalogue/)
+- **Agent Planning**: [Task Decomposition and Planning](https://research.csiro.au/ss/science/projects/agent-design-pattern-catalogue/) -->
 
 ## 📜 License
 
@@ -301,21 +302,3 @@ This project is released under the MIT License. See `LICENSE` file for details.
 **Built for the future of intelligent simulation** 🚀
 
 *This project demonstrates advanced AI agent capabilities for simulation experimentation, showcasing self-reflection, task planning, and protocol standardization through practical healthcare optimization applications.*
-
-
-
-# DES Experimentation Agent
-
-Feasibility materials for creating an AI agent that can discover, run, experiment, and report results from any DES model setup as a MCP server.
-
-## MCP Server
-
-An urgent call centre model where a user can vary demand, operator and nurse capacity, probability of call back, run length etc.
-
-Implemented using `FastMCP`
-
-### Self reflection agent
-
-Built using `LangGraph`. 
-
-<img src="./images/simple_agent_self_reflection.png" alt="drawing" width="300"/>
