@@ -252,12 +252,12 @@ The healthcare model provides the following performance metrics:
 | Nurse Utilization | Percentage of nurse availability used | Nurse staffing planning |
 | Callback Rate | Percentage of calls requiring nurse follow-up | Service complexity analysis |
 
-### Agent Performance Analysis
+<!-- ### Agent Performance Analysis
 Both agents provide detailed execution reporting:
 
 - **📈 Self-Reflection Agent**: Validation history, retry statistics, error analysis
 - **📋 Planning Agent**: Step-by-step execution logs, planning duration, memory usage
-- **🎯 Success Metrics**: Parameter validation rates, simulation completion times
+- **🎯 Success Metrics**: Parameter validation, simulation completion times -->
 
 ## 🔬 Research Applications
 
