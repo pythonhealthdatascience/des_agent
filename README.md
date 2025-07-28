@@ -73,6 +73,26 @@ Two complementary agent architectures demonstrate different reasoning approaches
 - [Ollama](https://ollama.ai/) server running locally
 - Mamba/conda or pip for environment management
 
+### Development Environment
+
+This project was developed and tested on the following system configuration:
+
+**Hardware Specifications:**
+- **System**: Dell XPS 8960
+- **CPU**: 13th Gen Intel i9-13900K (32 cores) @ 5.900GHz
+- **GPU**: NVIDIA GeForce RTX 4080
+- **RAM**: 64GB
+- **Operating System**: Ubuntu 24.04
+
+**Performance Notes:**
+- LLM inference with larger models (gemma3:27b, deepseek-r1:32b) benefits significantly from the high-core CPU and substantial RAM
+- GPU acceleration is utilized for compatible models through Ollama
+- The system handles concurrent agent execution and simulation processing efficiently
+
+*Note: While these specifications represent the development environment, the project can run on more modest hardware configurations. Minimum requirements are Python 3.11+ and sufficient RAM for your chosen LLM models.*
+
+
+
 ### Installation
 
 1. **Clone the repository**
@@ -273,6 +293,32 @@ This project demonstrates several cutting-edge research areas:
 - **🧠 Causal Reasoning**: Understanding cause-and-effect relationships in simulation results
 - **📈 Optimization Integration**: Automatic parameter optimization using simulation feedback
 - **🎯 Goal-Oriented Planning**: Agents working backwards from desired outcomes
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**MCP Server Connection Failed**
+- Ensure the MCP server is running on `http://localhost:8001/mcp`
+- Check that no other processes are using port 8001
+- Verify FastMCP installation: `pip install fastmcp`
+
+**Ollama Model Not Found**
+- Confirm model installation: `ollama list`
+- Pull missing models: `ollama pull gemma3:27b`
+- Check Ollama server status: `ollama serve`
+
+**Parameter Validation Failures**
+- Review the schema.json file for parameter constraints
+- Ensure numeric values are within specified ranges
+- Verify all required parameters are provided
+
+**Agent Timeout or Performance Issues**
+- Try smaller LLM models (e.g., `llama3:latest` instead of `gemma3:27b`)
+- Increase retry limits in agent configuration
+- Monitor system resources during execution
+
+For additional support, please open an issue with detailed error logs and system information.
 
 ## 🤝 Contributing
 
