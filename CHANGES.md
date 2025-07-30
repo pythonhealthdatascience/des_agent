@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Consistent identifier (represents all versions, resolves to latest): 
 
-## Unreleased
+## [v0.1.0](https://github.com/pythonhealthdatascience/des_agent/releases/tag/v0.1.0) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16616715.svg)](https://doi.org/10.5281/zenodo.16616715)
 
 Initial release. Feasibility of the approach. Simple commend line interface enhanced using `rich`. Tested with gemma3:27b and mistral:7b via Ollama. Running on RTX 4080.
 
