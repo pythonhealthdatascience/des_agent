@@ -2,6 +2,8 @@
 
 > **Advanced AI agents for discrete event simulation using self-reflection and task planning**
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16616715.svg)](https://doi.org/10.5281/zenodo.16616715)
+
 An intelligent agent system that demonstrates reasoning patterns for simulation experimentation through the **Model Content Protocol (MCP)**. This project showcases two agent architectures—**self-reflection** and **task planning**—applied to a healthcare call centre optimization problem.
 
 <img src="images/agent_self_reflect_demo.gif" width="600" alt="Demo animation">
