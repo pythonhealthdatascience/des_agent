@@ -43,7 +43,7 @@ class SimulationMCPServer:
             Tags: ["simulation", "{self.model.model_name}", "experiment"]
             """
         )
-        def run_simulation(parameters: dict) -> dict:
+        def run_call_centre_simulation(parameters: dict) -> dict:
             return self.model.run_simulation(parameters)
 
         @self.mcp.tool(

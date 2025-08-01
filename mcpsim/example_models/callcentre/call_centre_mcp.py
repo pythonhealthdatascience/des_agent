@@ -13,7 +13,7 @@ class CallCentreSimulationAdapter:
     
     @property
     def model_name(self) -> str:
-        return "urgent_care_call_centre"
+        return "call_centre"
     
     def run_simulation(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Run the discrete-event healthcare call centre simulation."""

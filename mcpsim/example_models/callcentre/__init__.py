@@ -1,0 +1,2 @@
+#callcentre.___init__
+from .call_centre_mcp import CallCentreSimulationAdapter
