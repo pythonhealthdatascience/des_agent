@@ -445,20 +445,6 @@ def parse_arguments():
 
 if __name__ == "__main__":
 
-    # TM notes: mistral:7b can fail and successed with reflection (or 2nd go)
-    # qwen2:math:7b is not suitable
-    # gemma3:27b both variants work well
-    # deepseek-r1:32b is too slow on 4080
-
-    #model_name = "gemma3n:e4b"
-    #model_name = "deepseek-r1:32b"
-    #model_name = "llama3:latest"
-    #model_name = "llama3.1:8b"
-    #model_name = "gemma3:27b"
-    # model_name = "gemma3:27b-it-qat"
-    #model_name = "qwen2-math:7b"
-    #model_name = "mistral:7b"
-
     # Parse command line arguments
     args = parse_arguments()
 
