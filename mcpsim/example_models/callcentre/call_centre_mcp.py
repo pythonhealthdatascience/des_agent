@@ -3,7 +3,7 @@ from model import run_simulation_from_dict
 from typing import Dict, Any
 
 
-class CallCentreSimulation:
+class CallCentreSimulationAdapter:
     """Call centre simulation implementation following 
     the SimulationModelAdapter protocol."""
     
