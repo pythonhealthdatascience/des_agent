@@ -444,11 +444,7 @@ async def run_plan(
                 )
                 llm_prompt_text = result.messages[0].content.text
 
-                if debug_mode:
-                    print(f"🐛 {llm_prompt_text}")
-
-
-                # Actually run LLM (synchronously!)
+                # run the prompt
                 llm_result = llm.invoke(llm_prompt_text)
                 parameters = json.loads(clean_llm_response(llm_result))
                 memory["parameters"] = parameters
@@ -544,7 +540,7 @@ async def main(
         logger.debug(f"Response length: {len(response)} characters")
         logger.debug("Response preview:")
         logger.debug(
-            response[:1000] + "..." if len(response) > 1000 else response
+            response[:500] + "..." if len(response) > 500 else response
         )
         debug_print_plan(plan_steps, logger)
 
