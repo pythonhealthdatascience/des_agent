@@ -2,7 +2,6 @@ name: des-agent
 channels:
   - conda-forge
 dependencies:
-  - arize-phoenix
   - fastmcp
   - pandas
   - python=3.11
@@ -15,7 +14,9 @@ dependencies:
   - tabulate
   - langgraph
   - pip:
+      - arize-phoenix-otel
       - langchain
       - langchain-community
       - langchain-core
       - langchain-ollama
+      - openinference-instrumentation-langchain

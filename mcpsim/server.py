@@ -1,8 +1,15 @@
+import os
+
 from fastmcp import FastMCP 
 from langchain_core.prompts import PromptTemplate
 from fastmcp.prompts.prompt import PromptMessage, TextContent
 
 from mcpsim.protocol import SimulationModelAdapter
+
+PARAMETER_PROMPT_PATH = "resources/parameter_prompt.txt"
+
+from mcpsim.tracing import init_tracing  # your helper module from previous discussion
+tracer_provider = init_tracing(project_name="sim-agent-mcp-server")
 
 class SimulationMCPServer:
     """MCP server that can work with any SimulationModelAdapter implementation."""
@@ -115,7 +122,12 @@ class SimulationMCPServer:
             user_input: str,
             validation_errors: str = ""
         ) -> PromptMessage:
-            with open("resources/parameter_prompt.txt", encoding="utf-8") as f:
+            
+            # handle path to schema file
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            parameter_prompt_path = os.path.join(dir_path, PARAMETER_PROMPT_PATH)
+
+            with open(parameter_prompt_path, encoding="utf-8") as f:
                 prompt_template_text = f.read()
             prompt = PromptTemplate.from_template(prompt_template_text)
 

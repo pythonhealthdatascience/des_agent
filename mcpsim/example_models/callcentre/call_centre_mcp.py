@@ -1,13 +1,19 @@
 import json
-from model import run_simulation_from_dict
+from .call_centre_model import run_simulation_from_dict
 from typing import Dict, Any
 
+import os
 
 class CallCentreSimulationAdapter:
     """Call centre simulation implementation following 
     the SimulationModelAdapter protocol."""
     
     def __init__(self, schema_path: str = "resources/schema.json"):
+        
+        # handle path to schema file
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        schema_path = os.path.join(dir_path, schema_path)
+        
         self.schema_path = schema_path
         self._schema = None
     
