@@ -2,6 +2,7 @@ name: des-agent
 channels:
   - conda-forge
 dependencies:
+  - arize-phoenix
   - fastmcp
   - pandas
   - python=3.11
