@@ -17,12 +17,12 @@ import itertools
 # Import OpenTelemetry trace API to capture span context
 from opentelemetry import trace
 
-# Initialize a global tracer from your helper
+# Initialize a global tracer 
 tracer_provider = init_tracing(project_name="mcp-agent-evaluation", endpoint="http://localhost:6006")
 tracer = tracer_provider.get_tracer("eval-runner-tracer")
 
 
-# ----------------- Comparison helpers (unchanged) -----------------
+# ----------------- Comparison helpers -----------------
 def floats_close(a: Any, b: Any, rtol: float = 1e-3, atol: float = 1e-6) -> bool:
     if a is None or b is None: return a is None and b is None
     try:
@@ -100,10 +100,6 @@ def compare_results(
     # 1. Check for structural differences (different keys).
     if set(s_got.index) != set(s_expected.index):
         return False
-
-    # If both are empty but have same (no) keys, they match.
-    # if s_got.empty:
-    #     return True
     
     # 2. Verify that ALL values in BOTH series are numeric.
     # pd.api.types.is_number is a robust way to check for int/float.
@@ -124,7 +120,7 @@ def compare_results(
         equal_nan=True  # Considers two NaN values to be equal.
     )
 
-# ----------------- Agent run helpers (unchanged) -----------------
+# ----------------- Agent run helpers ----------------
 async def run_agent_once(compiled_graph, user_input: str, llm: OllamaLLM) -> AgentState:
     state_in: AgentState = {"user_input": user_input, "retry_count": 0, "validation_history": []}
     return await compiled_graph.ainvoke(state_in)
@@ -132,7 +128,7 @@ async def run_agent_once(compiled_graph, user_input: str, llm: OllamaLLM) -> Age
 def extract_sim_result(state: AgentState) -> Optional[Dict[str, Any]]:
     return state.get("simulation_result")
 
-# ---------------- UPDATED Bulk Ingest Function ----------------
+# ---------------- Bulk Ingest Function for Phoenix ----------------
 def bulk_ingest_to_phoenix(json_path: str, eval_name: str = "Simulation Agent Eval"):
     """
     Loads an enriched evals.json file and bulk-ingests into Phoenix,
@@ -172,7 +168,7 @@ def bulk_ingest_to_phoenix(json_path: str, eval_name: str = "Simulation Agent Ev
     client.log_evaluations(SpanEvaluations(eval_name=eval_name, dataframe=eval_df))
     print(f"[✓] Pushed {len(eval_df)} eval rows to Phoenix under '{eval_name}'")
 
-# ---------------- UPDATED Main eval runner ----------------
+# ---------------- Main eval runner ----------------
 async def run_all_and_save(model_name: str = "gemma3:27b", limit: int = None):
     """
     Runs the full evaluation pipeline and saves an enriched evals.json
@@ -228,5 +224,5 @@ if __name__ == "__main__":
     if args.skip_run:
         bulk_ingest_to_phoenix("evals/evals_output.json", eval_name=args.eval_name)
     else:
-        asyncio.run(run_all_and_save(model_name="gemma3:27b", limit=args.limit))
+        asyncio.run(run_all_and_save(model_name="gpt-oss:20b", limit=args.limit))
         bulk_ingest_to_phoenix("evals/evals_output.json", eval_name=args.eval_name)

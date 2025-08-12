@@ -4,21 +4,21 @@
     "default": 13,
     "minimum": 1,
     "maximum": 100,
-    "description": "Number of call operators (1-100)"
+    "description": "Number of call operator staff on duty (1-100)"
   },
   "n_nurses": {
     "type": "int",
     "default": 10,
     "minimum": 1,
     "maximum": 50,
-    "description": "Number of nurse callbacks (1-50)"
+    "description": "Number of nurse staff on duty (1-50)"
   },
   "mean_iat": {
     "type": "float",
     "default": 0.6,
     "minimum": 0.1,
     "maximum": 10.0,
-    "description": "Mean time between arrivals (minutes) or inter-arrival time. 0.1 = 6 calls/min, 10.0 = 1 call/10min. An increase in demand = a reduction in the inter-arrival time. A reduction in demand = an increase in inter-arrival time"
+    "description": "Mean inter-arrival time in minutes (average time between arrivals). Baseline = 0.6 min.\n\nDemand changes:\n1. Percentage change form: If demand increases by fraction X, set mean_iat = baseline × (1 - X). If demand decreases by fraction X, set mean_iat = baseline × (1 + X).\n2. Multiplicative change form: If arrivals are multiplied by factor M (e.g., 'half the calls' = M=0.5, 'double the calls' = M=2), set mean_iat = baseline × (1 / M)."
   },
   "call_low": {
     "type": "float",

@@ -6,7 +6,8 @@ from fastmcp.prompts.prompt import PromptMessage, TextContent
 
 from mcpsim.protocol import SimulationModelAdapter
 
-PARAMETER_PROMPT_PATH = "resources/parameter_prompt.txt"
+# modified for experimentation...
+PARAMETER_PROMPT_PATH = "resources/parameter_prompt2.txt"
 
 from mcpsim.tracing import init_tracing  # your helper module from previous discussion
 
