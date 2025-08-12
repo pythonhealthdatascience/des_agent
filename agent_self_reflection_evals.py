@@ -76,6 +76,10 @@ import argparse
 import phoenix as px
 from phoenix.otel import register
 
+# used to annotate functions when tracing
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
+
 import os
 
 from mcpsim.tracing import init_tracing
@@ -234,6 +238,9 @@ async def generate_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str
 
 
 async def validate_parameters(state: Dict[str, Any]) -> Dict[str, Any]:
+
+
+    
     async with Client("http://localhost:8001/mcp") as cl:
         resp = await cl.call_tool(
             "validate_simulation_parameters",
@@ -251,7 +258,9 @@ async def validate_parameters(state: Dict[str, Any]) -> Dict[str, Any]:
         "validation_result": resp.data.copy()
     })
 
-    state["validation"] = resp.data
+    result = resp.data
+    state["validation"] = result
+
     return state
 
 def validation_branch(state: Dict[str, Any]) -> str:
