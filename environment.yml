@@ -1,4 +1,4 @@
-name: des-agent
+name: sim-agent
 channels:
   - conda-forge
 dependencies:
@@ -14,6 +14,7 @@ dependencies:
   - tabulate
   - langgraph
   - pip:
+      - arize-phoenix
       - arize-phoenix-otel
       - langchain
       - langchain-community
