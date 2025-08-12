@@ -1,0 +1,171 @@
+{
+  "example_1": {
+    "user_input": "Simulate 14 operators, 12 nurses and 5% extra demand",
+    "parameters": {
+      "n_operators": 14,
+      "n_nurses": 12,
+      "mean_iat": 0.57,
+      "call_low": 5.0,
+      "call_mode": 7.0,
+      "call_high": 10.0,
+      "callback_prob": 0.4,
+      "nurse_consult_low": 10.0,
+      "nurse_consult_high": 20.0,
+      "random_seed": 0,
+      "run_length": 1000
+    }
+  },
+  
+  "example_2": {
+    "user_input": "Run scenario with double staffing and normal call volume",
+    "parameters": {
+      "n_operators": 26,
+      "n_nurses": 20,
+      "mean_iat": 0.6,
+      "call_low": 5.0,
+      "call_mode": 7.0,
+      "call_high": 10.0,
+      "callback_prob": 0.4,
+      "nurse_consult_low": 10.0,
+      "nurse_consult_high": 20.0,
+      "random_seed": 0,
+      "run_length": 1000
+    }
+  },
+  
+  "example_3": {
+    "user_input": "Test configuration with 8 operators, 6 nurses, and 20% increased demand",
+    "parameters": {
+      "n_operators": 8,
+      "n_nurses": 6,
+      "mean_iat": 0.48,
+      "call_low": 5.0,
+      "call_mode": 7.0,
+      "call_high": 10.0,
+      "callback_prob": 0.4,
+      "nurse_consult_low": 10.0,
+      "nurse_consult_high": 20.0,
+      "random_seed": 0,
+      "run_length": 1000
+    }
+  },
+  
+  "example_4": {
+    "user_input": "Simulate with 20 operators, 15 nurses, and half the usual call volume",
+    "parameters": {
+      "n_operators": 20,
+      "n_nurses": 15,
+      "mean_iat": 1.2,
+      "call_low": 5.0,
+      "call_mode": 7.0,
+      "call_high": 10.0,
+      "callback_prob": 0.4,
+      "nurse_consult_low": 10.0,
+      "nurse_consult_high": 20.0,
+      "random_seed": 0,
+      "run_length": 1000
+    }
+  },
+  
+  "example_5": {
+    "user_input": "Run with 10 operators, 8 nurses, 30% callback probability, and 10% reduced demand",
+    "parameters": {
+      "n_operators": 10,
+      "n_nurses": 8,
+      "mean_iat": 0.66,
+      "call_low": 5.0,
+      "call_mode": 7.0,
+      "call_high": 10.0,
+      "callback_prob": 0.3,
+      "nurse_consult_low": 10.0,
+      "nurse_consult_high": 20.0,
+      "random_seed": 0,
+      "run_length": 1000
+    }
+  },
+  
+  "example_6": {
+    "user_input": "Test scenario: 25 operators, 25 nurses, triple demand",
+    "parameters": {
+      "n_operators": 25,
+      "n_nurses": 25,
+      "mean_iat": 0.2,
+      "call_low": 5.0,
+      "call_mode": 7.0,
+      "call_high": 10.0,
+      "callback_prob": 0.4,
+      "nurse_consult_low": 10.0,
+      "nurse_consult_high": 20.0,
+      "random_seed": 0,
+      "run_length": 1000
+    }
+  },
+  
+  "example_7": {
+    "user_input": "Simulate 15 operators, 12 nurses, call durations 3-6-9 minutes, 2000 minute runtime",
+    "parameters": {
+      "n_operators": 15,
+      "n_nurses": 12,
+      "mean_iat": 0.6,
+      "call_low": 3.0,
+      "call_mode": 6.0,
+      "call_high": 9.0,
+      "callback_prob": 0.4,
+      "nurse_consult_low": 10.0,
+      "nurse_consult_high": 20.0,
+      "random_seed": 0,
+      "run_length": 2000
+    }
+  },
+  
+  "example_8": {
+    "user_input": "Run with 6 operators, 4 nurses, 60% callback rate, and 25% higher demand",
+    "parameters": {
+      "n_operators": 6,
+      "n_nurses": 4,
+      "mean_iat": 0.45,
+      "call_low": 5.0,
+      "call_mode": 7.0,
+      "call_high": 10.0,
+      "callback_prob": 0.6,
+      "nurse_consult_low": 10.0,
+      "nurse_consult_high": 20.0,
+      "random_seed": 0,
+      "run_length": 1000
+    }
+  },
+  
+  "example_9": {
+    "user_input": "Test configuration: 18 operators, 14 nurses, nurse consultations 15-25 minutes, normal demand",
+    "parameters": {
+      "n_operators": 18,
+      "n_nurses": 14,
+      "mean_iat": 0.6,
+      "call_low": 5.0,
+      "call_mode": 7.0,
+      "call_high": 10.0,
+      "callback_prob": 0.4,
+      "nurse_consult_low": 15.0,
+      "nurse_consult_high": 25.0,
+      "random_seed": 0,
+      "run_length": 1000
+    }
+  },
+  
+  "example_10": {
+    "user_input": "Simulate 12 operators, 10 nurses, 50% callback probability, and 40% demand reduction",
+    "parameters": {
+      "n_operators": 12,
+      "n_nurses": 10,
+      "mean_iat": 0.84,
+      "call_low": 5.0,
+      "call_mode": 7.0,
+      "call_high": 10.0,
+      "callback_prob": 0.5,
+      "nurse_consult_low": 10.0,
+      "nurse_consult_high": 20.0,
+      "random_seed": 0,
+      "run_length": 1000
+    }
+  }
+}

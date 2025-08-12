@@ -9,7 +9,9 @@ from mcpsim.protocol import SimulationModelAdapter
 PARAMETER_PROMPT_PATH = "resources/parameter_prompt.txt"
 
 from mcpsim.tracing import init_tracing  # your helper module from previous discussion
-tracer_provider = init_tracing(project_name="sim-agent-mcp-server")
+
+tracer_provider = init_tracing(project_name="sim-agent-evaluation")
+tracer = tracer_provider.get_tracer("mcp-server-tracer")
 
 class SimulationMCPServer:
     """MCP server that can work with any SimulationModelAdapter implementation."""
@@ -38,6 +40,7 @@ class SimulationMCPServer:
         """Register MCP tools that delegate to the simulation model."""
         
         # note investigate how to clean up description
+        @tracer.tool(name="MCP.run_call_centre_simulation")
         @self.mcp.tool(
             name=f"run_{self.model.model_name}_simulation",
             description=f"""
@@ -53,6 +56,7 @@ class SimulationMCPServer:
         def run_call_centre_simulation(parameters: dict) -> dict:
             return self.model.run_simulation(parameters)
 
+        @tracer.tool(name="MCP.validate_simulation_parameters")
         @self.mcp.tool(
             name="validate_simulation_parameters",
             description="""

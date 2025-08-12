@@ -80,9 +80,15 @@ from phoenix.otel import register
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
-import os
 
 from mcpsim.tracing import init_tracing
+# Initialize tracing with the unified project name.
+tracer_provider = init_tracing(project_name="mcp-agent-evaluation")
+# Create a module-level tracer object.
+tracer = tracer_provider.get_tracer("langgraph-agent-tracer")
+
+import os
+
 
 console = Console()
 
@@ -187,7 +193,6 @@ async def fetch_schema(state: Dict[str, Any]) -> Dict[str, Any]:
         state["schema"] = res[0].text if hasattr(res[0], "text") else res[0]
     return state
 
-
 async def generate_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str, Any]:
     async with Client("http://localhost:8001/mcp") as cl:
 
@@ -238,8 +243,6 @@ async def generate_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str
 
 
 async def validate_parameters(state: Dict[str, Any]) -> Dict[str, Any]:
-
-
     
     async with Client("http://localhost:8001/mcp") as cl:
         resp = await cl.call_tool(
@@ -291,7 +294,6 @@ async def run_simulation(state: Dict[str, Any]) -> Dict[str, Any]:
         )
     state["simulation_result"] = resp.data
     return state
-
 
 async def summarise_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str, Any]:
     """Generates a formatted markdown table of parameters from JSON. 
@@ -415,7 +417,8 @@ def display_validation_history(state: AgentState):
 async def main(model_name: str) -> None:
 
     # 0. setup eval server
-    tracer = init_tracing()
+    # tracer_provider = init_tracing(project_name="sim-agent-evaluation")
+    # tracer = tracer_provider.get_tracer("langgraph-agent-tracer")
 
     # 1. Setup the graph and LLM
     llm = OllamaLLM(model=model_name, base_url="http://localhost:11434")
