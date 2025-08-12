@@ -21,88 +21,18 @@
       "04_nurse_util": 90.36357093206236,
       "05_callback_rate": 42.5531914893617
     },
-    "agent_run": {
-      "simulation_result": {
-        "01_mean_waiting_time": 2.3504694345055652,
-        "02_operator_util": 90.86219986414451,
-        "03_mean_nurse_waiting_time": 4.1106430489118715,
-        "04_nurse_util": 90.36357093206236,
-        "05_callback_rate": 42.5531914893617
-      },
-      "meta": {
-        "retry_count": 0,
-        "had_bailout": false,
-        "validation_history": [
-          {
-            "attempt": 1,
-            "parameters": {
-              "n_operators": 14,
-              "n_nurses": 12,
-              "mean_iat": 0.57,
-              "call_low": 5.0,
-              "call_mode": 7.0,
-              "call_high": 10.0,
-              "callback_prob": 0.4,
-              "nurse_consult_low": 10.0,
-              "nurse_consult_high": 20.0,
-              "random_seed": 0,
-              "run_length": 1000
-            },
-            "validation_result": {
-              "is_valid": true,
-              "errors": []
-            }
-          }
-        ],
-        "parameters": {
-          "n_operators": 14,
-          "n_nurses": 12,
-          "mean_iat": 0.57,
-          "call_low": 5.0,
-          "call_mode": 7.0,
-          "call_high": 10.0,
-          "callback_prob": 0.4,
-          "nurse_consult_low": 10.0,
-          "nurse_consult_high": 20.0,
-          "random_seed": 0,
-          "run_length": 1000
-        },
-        "formatted_parameters": "**Parameters used in simulation**\n\n| \ud83d\udcc8 Parameter | Value |\n|---|---|\n| n_operators | 14 |\n| n_nurses | 12 |\n| mean_iat | 0.57 |\n| call_low | 5.0 |\n| call_mode | 7.0 |\n| call_high | 10.0 |\n| callback_prob | 0.4 |\n| nurse_consult_low | 10.0 |\n| nurse_consult_high | 20.0 |\n| random_seed | 0 |\n| run_length | 1000 |\n"
-      }
+    "agent_result": {
+      "01_mean_waiting_time": 2.3504694345055652,
+      "02_operator_util": 90.86219986414451,
+      "03_mean_nurse_waiting_time": 4.1106430489118715,
+      "04_nurse_util": 90.36357093206236,
+      "05_callback_rate": 42.5531914893617
     },
-    "comparison": {
-      "pass": true,
-      "details": {
-        "01_mean_waiting_time": {
-          "expected": 2.3504694345055652,
-          "got": 2.3504694345055652,
-          "match": true
-        },
-        "02_operator_util": {
-          "expected": 90.86219986414451,
-          "got": 90.86219986414451,
-          "match": true
-        },
-        "03_mean_nurse_waiting_time": {
-          "expected": 4.1106430489118715,
-          "got": 4.1106430489118715,
-          "match": true
-        },
-        "04_nurse_util": {
-          "expected": 90.36357093206236,
-          "got": 90.36357093206236,
-          "match": true
-        },
-        "05_callback_rate": {
-          "expected": 42.5531914893617,
-          "got": 42.5531914893617,
-          "match": true
-        }
-      },
-      "rtol": 0.001,
-      "atol": 1e-06
-    },
-    "passed": true
+    "passed": true,
+    "context": {
+      "trace_id": "f5261ab566c4e5bebfbea7cc7f28b71c",
+      "span_id": "fd13f4f202d0d7a5"
+    }
   },
   "example_2": {
     "user_input": "Run scenario with double staffing and normal call volume",
@@ -126,88 +56,18 @@
       "04_nurse_util": 51.20346053052576,
       "05_callback_rate": 42.12121212121212
     },
-    "agent_run": {
-      "simulation_result": {
-        "01_mean_waiting_time": 0.0,
-        "02_operator_util": 46.452122409679156,
-        "03_mean_nurse_waiting_time": 43.94073145744734,
-        "04_nurse_util": 97.41291238872327,
-        "05_callback_rate": 42.12121212121212
-      },
-      "meta": {
-        "retry_count": 0,
-        "had_bailout": false,
-        "validation_history": [
-          {
-            "attempt": 1,
-            "parameters": {
-              "n_operators": 26,
-              "n_nurses": 10,
-              "mean_iat": 0.6,
-              "call_low": 5.0,
-              "call_mode": 7.0,
-              "call_high": 10.0,
-              "callback_prob": 0.4,
-              "nurse_consult_low": 10.0,
-              "nurse_consult_high": 20.0,
-              "random_seed": 0,
-              "run_length": 1000
-            },
-            "validation_result": {
-              "is_valid": true,
-              "errors": []
-            }
-          }
-        ],
-        "parameters": {
-          "n_operators": 26,
-          "n_nurses": 10,
-          "mean_iat": 0.6,
-          "call_low": 5.0,
-          "call_mode": 7.0,
-          "call_high": 10.0,
-          "callback_prob": 0.4,
-          "nurse_consult_low": 10.0,
-          "nurse_consult_high": 20.0,
-          "random_seed": 0,
-          "run_length": 1000
-        },
-        "formatted_parameters": "**Parameters used in simulation**\n\n| \ud83d\udcc8 Parameter | Value |\n|---|---|\n| n_operators | 26 |\n| n_nurses | 10 |\n| mean_iat | 0.6 |\n| call_low | 5.0 |\n| call_mode | 7.0 |\n| call_high | 10.0 |\n| callback_prob | 0.4 |\n| nurse_consult_low | 10.0 |\n| nurse_consult_high | 20.0 |\n| random_seed | 0 |\n| run_length | 1000 |\n"
-      }
+    "agent_result": {
+      "01_mean_waiting_time": 0.0,
+      "02_operator_util": 46.452122409679156,
+      "03_mean_nurse_waiting_time": 43.94073145744734,
+      "04_nurse_util": 97.41291238872327,
+      "05_callback_rate": 42.12121212121212
     },
-    "comparison": {
-      "pass": false,
-      "details": {
-        "01_mean_waiting_time": {
-          "expected": 0.0,
-          "got": 0.0,
-          "match": true
-        },
-        "02_operator_util": {
-          "expected": 46.452122409679156,
-          "got": 46.452122409679156,
-          "match": true
-        },
-        "03_mean_nurse_waiting_time": {
-          "expected": 0.0041045663539504606,
-          "got": 43.94073145744734,
-          "match": false
-        },
-        "04_nurse_util": {
-          "expected": 51.20346053052576,
-          "got": 97.41291238872327,
-          "match": false
-        },
-        "05_callback_rate": {
-          "expected": 42.12121212121212,
-          "got": 42.12121212121212,
-          "match": true
-        }
-      },
-      "rtol": 0.001,
-      "atol": 1e-06
-    },
-    "passed": false
+    "passed": false,
+    "context": {
+      "trace_id": "c93069f691d1a1edbca3886db55bc2cc",
+      "span_id": "1c4b8ed595ac9a41"
+    }
   },
   "example_3": {
     "user_input": "Test configuration with 8 operators, 6 nurses, and 20% increased demand",
@@ -231,88 +91,18 @@
       "04_nurse_util": 97.8390040780754,
       "05_callback_rate": 42.48847926267281
     },
-    "agent_run": {
-      "simulation_result": {
-        "01_mean_waiting_time": 230.08648598465186,
-        "02_operator_util": 99.35481108027054,
-        "03_mean_nurse_waiting_time": 78.94871019130441,
-        "04_nurse_util": 97.8390040780754,
-        "05_callback_rate": 42.48847926267281
-      },
-      "meta": {
-        "retry_count": 0,
-        "had_bailout": false,
-        "validation_history": [
-          {
-            "attempt": 1,
-            "parameters": {
-              "n_operators": 8,
-              "n_nurses": 6,
-              "mean_iat": 0.504,
-              "call_low": 5.0,
-              "call_mode": 7.0,
-              "call_high": 10.0,
-              "callback_prob": 0.4,
-              "nurse_consult_low": 10.0,
-              "nurse_consult_high": 20.0,
-              "random_seed": 0,
-              "run_length": 1000
-            },
-            "validation_result": {
-              "is_valid": true,
-              "errors": []
-            }
-          }
-        ],
-        "parameters": {
-          "n_operators": 8,
-          "n_nurses": 6,
-          "mean_iat": 0.504,
-          "call_low": 5.0,
-          "call_mode": 7.0,
-          "call_high": 10.0,
-          "callback_prob": 0.4,
-          "nurse_consult_low": 10.0,
-          "nurse_consult_high": 20.0,
-          "random_seed": 0,
-          "run_length": 1000
-        },
-        "formatted_parameters": "**Parameters used in simulation**\n\n| \ud83d\udcc8 Parameter | Value |\n|---|---|\n| n_operators | 8 |\n| n_nurses | 6 |\n| mean_iat | 0.504 |\n| call_low | 5.0 |\n| call_mode | 7.0 |\n| call_high | 10.0 |\n| callback_prob | 0.4 |\n| nurse_consult_low | 10.0 |\n| nurse_consult_high | 20.0 |\n| random_seed | 0 |\n| run_length | 1000 |\n"
-      }
+    "agent_result": {
+      "01_mean_waiting_time": 230.08648598465186,
+      "02_operator_util": 99.35481108027054,
+      "03_mean_nurse_waiting_time": 78.94871019130441,
+      "04_nurse_util": 97.8390040780754,
+      "05_callback_rate": 42.48847926267281
     },
-    "comparison": {
-      "pass": false,
-      "details": {
-        "01_mean_waiting_time": {
-          "expected": 242.69198606467467,
-          "got": 230.08648598465186,
-          "match": false
-        },
-        "02_operator_util": {
-          "expected": 99.35481108027054,
-          "got": 99.35481108027054,
-          "match": true
-        },
-        "03_mean_nurse_waiting_time": {
-          "expected": 78.94431797274639,
-          "got": 78.94871019130441,
-          "match": true
-        },
-        "04_nurse_util": {
-          "expected": 97.8390040780754,
-          "got": 97.8390040780754,
-          "match": true
-        },
-        "05_callback_rate": {
-          "expected": 42.48847926267281,
-          "got": 42.48847926267281,
-          "match": true
-        }
-      },
-      "rtol": 0.001,
-      "atol": 1e-06
-    },
-    "passed": false
+    "passed": false,
+    "context": {
+      "trace_id": "0f08ea84447ef6e9bdb05a17920807db",
+      "span_id": "b87894c014f8cf28"
+    }
   },
   "example_4": {
     "user_input": "Simulate with 20 operators, 15 nurses, and half the usual call volume",
@@ -336,88 +126,18 @@
       "04_nurse_util": 35.17900361818962,
       "05_callback_rate": 42.17289719626168
     },
-    "agent_run": {
-      "simulation_result": {
-        "01_mean_waiting_time": 0.0,
-        "02_operator_util": 31.21492694742085,
-        "03_mean_nurse_waiting_time": 0.0,
-        "04_nurse_util": 35.17900361818962,
-        "05_callback_rate": 42.17289719626168
-      },
-      "meta": {
-        "retry_count": 0,
-        "had_bailout": false,
-        "validation_history": [
-          {
-            "attempt": 1,
-            "parameters": {
-              "n_operators": 20,
-              "n_nurses": 15,
-              "mean_iat": 1.2,
-              "call_low": 5.0,
-              "call_mode": 7.0,
-              "call_high": 10.0,
-              "callback_prob": 0.4,
-              "nurse_consult_low": 10.0,
-              "nurse_consult_high": 20.0,
-              "random_seed": 0,
-              "run_length": 1000
-            },
-            "validation_result": {
-              "is_valid": true,
-              "errors": []
-            }
-          }
-        ],
-        "parameters": {
-          "n_operators": 20,
-          "n_nurses": 15,
-          "mean_iat": 1.2,
-          "call_low": 5.0,
-          "call_mode": 7.0,
-          "call_high": 10.0,
-          "callback_prob": 0.4,
-          "nurse_consult_low": 10.0,
-          "nurse_consult_high": 20.0,
-          "random_seed": 0,
-          "run_length": 1000
-        },
-        "formatted_parameters": "**Parameters used in simulation**\n\n| \ud83d\udcc8 Parameter | Value |\n|---|---|\n| n_operators | 20 |\n| n_nurses | 15 |\n| mean_iat | 1.2 |\n| call_low | 5.0 |\n| call_mode | 7.0 |\n| call_high | 10.0 |\n| callback_prob | 0.4 |\n| nurse_consult_low | 10.0 |\n| nurse_consult_high | 20.0 |\n| random_seed | 0 |\n| run_length | 1000 |\n"
-      }
+    "agent_result": {
+      "01_mean_waiting_time": 0.0,
+      "02_operator_util": 31.21492694742085,
+      "03_mean_nurse_waiting_time": 0.0,
+      "04_nurse_util": 35.17900361818962,
+      "05_callback_rate": 42.17289719626168
     },
-    "comparison": {
-      "pass": true,
-      "details": {
-        "01_mean_waiting_time": {
-          "expected": 0.0,
-          "got": 0.0,
-          "match": true
-        },
-        "02_operator_util": {
-          "expected": 31.21492694742085,
-          "got": 31.21492694742085,
-          "match": true
-        },
-        "03_mean_nurse_waiting_time": {
-          "expected": 0.0,
-          "got": 0.0,
-          "match": true
-        },
-        "04_nurse_util": {
-          "expected": 35.17900361818962,
-          "got": 35.17900361818962,
-          "match": true
-        },
-        "05_callback_rate": {
-          "expected": 42.17289719626168,
-          "got": 42.17289719626168,
-          "match": true
-        }
-      },
-      "rtol": 0.001,
-      "atol": 1e-06
-    },
-    "passed": true
+    "passed": true,
+    "context": {
+      "trace_id": "3a7d4f511089509f19d615d5b04a725d",
+      "span_id": "926e778adc644f4c"
+    }
   },
   "example_5": {
     "user_input": "Run with 10 operators, 8 nurses, 30% callback probability, and 10% reduced demand",
@@ -441,88 +161,18 @@
       "04_nurse_util": 82.46774067208518,
       "05_callback_rate": 33.012583271650634
     },
-    "agent_run": {
-      "simulation_result": {
-        "01_mean_waiting_time": 46.3970260873325,
-        "02_operator_util": 98.6111946659619,
-        "03_mean_nurse_waiting_time": 2.290083053642536,
-        "04_nurse_util": 82.07127437115734,
-        "05_callback_rate": 33.11061618411284
-      },
-      "meta": {
-        "retry_count": 0,
-        "had_bailout": false,
-        "validation_history": [
-          {
-            "attempt": 1,
-            "parameters": {
-              "n_operators": 10,
-              "n_nurses": 8,
-              "mean_iat": 0.69,
-              "callback_prob": 0.3,
-              "nurse_consult_low": 10.0,
-              "nurse_consult_high": 20.0,
-              "call_low": 5.0,
-              "call_mode": 7.0,
-              "call_high": 10.0,
-              "random_seed": 0,
-              "run_length": 1000
-            },
-            "validation_result": {
-              "is_valid": true,
-              "errors": []
-            }
-          }
-        ],
-        "parameters": {
-          "n_operators": 10,
-          "n_nurses": 8,
-          "mean_iat": 0.69,
-          "callback_prob": 0.3,
-          "nurse_consult_low": 10.0,
-          "nurse_consult_high": 20.0,
-          "call_low": 5.0,
-          "call_mode": 7.0,
-          "call_high": 10.0,
-          "random_seed": 0,
-          "run_length": 1000
-        },
-        "formatted_parameters": "**Parameters used in simulation**\n\n| \ud83d\udcc8 Parameter | Value |\n|---|---|\n| n_operators | 10 |\n| n_nurses | 8 |\n| mean_iat | 0.69 |\n| callback_prob | 0.3 |\n| nurse_consult_low | 10.0 |\n| nurse_consult_high | 20.0 |\n| call_low | 5.0 |\n| call_mode | 7.0 |\n| call_high | 10.0 |\n| random_seed | 0 |\n| run_length | 1000 |\n"
-      }
+    "agent_result": {
+      "01_mean_waiting_time": 46.3970260873325,
+      "02_operator_util": 98.6111946659619,
+      "03_mean_nurse_waiting_time": 2.290083053642536,
+      "04_nurse_util": 82.07127437115734,
+      "05_callback_rate": 33.11061618411284
     },
-    "comparison": {
-      "pass": false,
-      "details": {
-        "01_mean_waiting_time": {
-          "expected": 62.26336943615235,
-          "got": 46.3970260873325,
-          "match": false
-        },
-        "02_operator_util": {
-          "expected": 98.91827940297605,
-          "got": 98.6111946659619,
-          "match": false
-        },
-        "03_mean_nurse_waiting_time": {
-          "expected": 2.3551925550777337,
-          "got": 2.290083053642536,
-          "match": false
-        },
-        "04_nurse_util": {
-          "expected": 82.46774067208518,
-          "got": 82.07127437115734,
-          "match": false
-        },
-        "05_callback_rate": {
-          "expected": 33.012583271650634,
-          "got": 33.11061618411284,
-          "match": false
-        }
-      },
-      "rtol": 0.001,
-      "atol": 1e-06
-    },
-    "passed": false
+    "passed": false,
+    "context": {
+      "trace_id": "3dd0f874abcf87f832d31fb352632636",
+      "span_id": "ad80c628897ebbbe"
+    }
   },
   "example_6": {
     "user_input": "Test scenario: 25 operators, 25 nurses, triple demand",
@@ -546,88 +196,18 @@
       "04_nurse_util": 83.59706413413956,
       "05_callback_rate": 41.69621749408983
     },
-    "agent_run": {
-      "simulation_result": {
-        "01_mean_waiting_time": 161.26826119772568,
-        "02_operator_util": 99.27336565709264,
-        "03_mean_nurse_waiting_time": 0.4505143843086236,
-        "04_nurse_util": 83.59706413413956,
-        "05_callback_rate": 41.69621749408983
-      },
-      "meta": {
-        "retry_count": 0,
-        "had_bailout": false,
-        "validation_history": [
-          {
-            "attempt": 1,
-            "parameters": {
-              "n_operators": 25,
-              "n_nurses": 25,
-              "mean_iat": 0.2,
-              "call_low": 5.0,
-              "call_mode": 7.0,
-              "call_high": 10.0,
-              "callback_prob": 0.4,
-              "nurse_consult_low": 10.0,
-              "nurse_consult_high": 20.0,
-              "random_seed": 0,
-              "run_length": 1000
-            },
-            "validation_result": {
-              "is_valid": true,
-              "errors": []
-            }
-          }
-        ],
-        "parameters": {
-          "n_operators": 25,
-          "n_nurses": 25,
-          "mean_iat": 0.2,
-          "call_low": 5.0,
-          "call_mode": 7.0,
-          "call_high": 10.0,
-          "callback_prob": 0.4,
-          "nurse_consult_low": 10.0,
-          "nurse_consult_high": 20.0,
-          "random_seed": 0,
-          "run_length": 1000
-        },
-        "formatted_parameters": "**Parameters used in simulation**\n\n| \ud83d\udcc8 Parameter | Value |\n|---|---|\n| n_operators | 25 |\n| n_nurses | 25 |\n| mean_iat | 0.2 |\n| call_low | 5.0 |\n| call_mode | 7.0 |\n| call_high | 10.0 |\n| callback_prob | 0.4 |\n| nurse_consult_low | 10.0 |\n| nurse_consult_high | 20.0 |\n| random_seed | 0 |\n| run_length | 1000 |\n"
-      }
+    "agent_result": {
+      "01_mean_waiting_time": 161.26826119772568,
+      "02_operator_util": 99.27336565709264,
+      "03_mean_nurse_waiting_time": 0.4505143843086236,
+      "04_nurse_util": 83.59706413413956,
+      "05_callback_rate": 41.69621749408983
     },
-    "comparison": {
-      "pass": true,
-      "details": {
-        "01_mean_waiting_time": {
-          "expected": 161.26826119772568,
-          "got": 161.26826119772568,
-          "match": true
-        },
-        "02_operator_util": {
-          "expected": 99.27336565709264,
-          "got": 99.27336565709264,
-          "match": true
-        },
-        "03_mean_nurse_waiting_time": {
-          "expected": 0.4505143843086236,
-          "got": 0.4505143843086236,
-          "match": true
-        },
-        "04_nurse_util": {
-          "expected": 83.59706413413956,
-          "got": 83.59706413413956,
-          "match": true
-        },
-        "05_callback_rate": {
-          "expected": 41.69621749408983,
-          "got": 41.69621749408983,
-          "match": true
-        }
-      },
-      "rtol": 0.001,
-      "atol": 1e-06
-    },
-    "passed": true
+    "passed": true,
+    "context": {
+      "trace_id": "7665b2b29408259e148fccd619ac80e6",
+      "span_id": "06181825b8538a83"
+    }
   },
   "example_7": {
     "user_input": "Simulate 15 operators, 12 nurses, call durations 3-6-9 minutes, 2000 minute runtime",
@@ -651,88 +231,18 @@
       "04_nurse_util": 86.43094276820304,
       "05_callback_rate": 41.684147437818396
     },
-    "agent_run": {
-      "simulation_result": {
-        "01_mean_waiting_time": 0.07192106569784922,
-        "02_operator_util": 66.74240386374329,
-        "03_mean_nurse_waiting_time": 2.663802537251699,
-        "04_nurse_util": 86.43094276820304,
-        "05_callback_rate": 41.684147437818396
-      },
-      "meta": {
-        "retry_count": 0,
-        "had_bailout": false,
-        "validation_history": [
-          {
-            "attempt": 1,
-            "parameters": {
-              "n_operators": 15,
-              "n_nurses": 12,
-              "mean_iat": 0.6,
-              "call_low": 3.0,
-              "call_mode": 6.0,
-              "call_high": 9.0,
-              "callback_prob": 0.4,
-              "nurse_consult_low": 10.0,
-              "nurse_consult_high": 20.0,
-              "random_seed": 0,
-              "run_length": 2000
-            },
-            "validation_result": {
-              "is_valid": true,
-              "errors": []
-            }
-          }
-        ],
-        "parameters": {
-          "n_operators": 15,
-          "n_nurses": 12,
-          "mean_iat": 0.6,
-          "call_low": 3.0,
-          "call_mode": 6.0,
-          "call_high": 9.0,
-          "callback_prob": 0.4,
-          "nurse_consult_low": 10.0,
-          "nurse_consult_high": 20.0,
-          "random_seed": 0,
-          "run_length": 2000
-        },
-        "formatted_parameters": "**Parameters used in simulation**\n\n| \ud83d\udcca Parameter | Value |\n|---|---|\n| n_operators | 15 |\n| n_nurses | 12 |\n| mean_iat | 0.6 |\n| call_low | 3.0 |\n| call_mode | 6.0 |\n| call_high | 9.0 |\n| callback_prob | 0.4 |\n| nurse_consult_low | 10.0 |\n| nurse_consult_high | 20.0 |\n| random_seed | 0 |\n| run_length | 2000 |\n"
-      }
+    "agent_result": {
+      "01_mean_waiting_time": 0.07192106569784922,
+      "02_operator_util": 66.74240386374329,
+      "03_mean_nurse_waiting_time": 2.663802537251699,
+      "04_nurse_util": 86.43094276820304,
+      "05_callback_rate": 41.684147437818396
     },
-    "comparison": {
-      "pass": true,
-      "details": {
-        "01_mean_waiting_time": {
-          "expected": 0.07192106569784922,
-          "got": 0.07192106569784922,
-          "match": true
-        },
-        "02_operator_util": {
-          "expected": 66.74240386374329,
-          "got": 66.74240386374329,
-          "match": true
-        },
-        "03_mean_nurse_waiting_time": {
-          "expected": 2.663802537251699,
-          "got": 2.663802537251699,
-          "match": true
-        },
-        "04_nurse_util": {
-          "expected": 86.43094276820304,
-          "got": 86.43094276820304,
-          "match": true
-        },
-        "05_callback_rate": {
-          "expected": 41.684147437818396,
-          "got": 41.684147437818396,
-          "match": true
-        }
-      },
-      "rtol": 0.001,
-      "atol": 1e-06
-    },
-    "passed": true
+    "passed": true,
+    "context": {
+      "trace_id": "351c928786d9364f8bf28983dd16c0a8",
+      "span_id": "6bffbbff22841ac8"
+    }
   },
   "example_8": {
     "user_input": "Run with 6 operators, 4 nurses, 60% callback rate, and 25% higher demand",
@@ -756,78 +266,18 @@
       "04_nurse_util": 97.69465771729217,
       "05_callback_rate": 57.87545787545788
     },
-    "agent_run": {
-      "simulation_result": {
-        "01_mean_waiting_time": 306.74172321599656,
-        "02_operator_util": 99.45155480236895,
-        "03_mean_nurse_waiting_time": 196.98238666596234,
-        "04_nurse_util": 97.69465771729217,
-        "05_callback_rate": 57.8239608801956
-      },
-      "meta": {
-        "retry_count": 0,
-        "had_bailout": false,
-        "validation_history": [
-          {
-            "attempt": 1,
-            "parameters": {
-              "n_operators": 6,
-              "n_nurses": 4,
-              "mean_iat": 0.48,
-              "callback_prob": 0.6,
-              "random_seed": 0,
-              "run_length": 1000
-            },
-            "validation_result": {
-              "is_valid": true,
-              "errors": []
-            }
-          }
-        ],
-        "parameters": {
-          "n_operators": 6,
-          "n_nurses": 4,
-          "mean_iat": 0.48,
-          "callback_prob": 0.6,
-          "random_seed": 0,
-          "run_length": 1000
-        },
-        "formatted_parameters": "**Parameters used in simulation**\n\n| \ud83d\udcca Parameter | Value |\n|---|---|\n| n_operators | 6 |\n| n_nurses | 4 |\n| mean_iat | 0.48 |\n| callback_prob | 0.6 |\n| random_seed | 0 |\n| run_length | 1000 |\n"
-      }
+    "agent_result": {
+      "01_mean_waiting_time": 306.74172321599656,
+      "02_operator_util": 99.45155480236895,
+      "03_mean_nurse_waiting_time": 196.98238666596234,
+      "04_nurse_util": 97.69465771729217,
+      "05_callback_rate": 57.8239608801956
     },
-    "comparison": {
-      "pass": false,
-      "details": {
-        "01_mean_waiting_time": {
-          "expected": 318.98668257451686,
-          "got": 306.74172321599656,
-          "match": false
-        },
-        "02_operator_util": {
-          "expected": 99.56949574531609,
-          "got": 99.45155480236895,
-          "match": false
-        },
-        "03_mean_nurse_waiting_time": {
-          "expected": 196.98753442211358,
-          "got": 196.98238666596234,
-          "match": true
-        },
-        "04_nurse_util": {
-          "expected": 97.69465771729217,
-          "got": 97.69465771729217,
-          "match": true
-        },
-        "05_callback_rate": {
-          "expected": 57.87545787545788,
-          "got": 57.8239608801956,
-          "match": true
-        }
-      },
-      "rtol": 0.001,
-      "atol": 1e-06
-    },
-    "passed": false
+    "passed": false,
+    "context": {
+      "trace_id": "774aa223e001e166a7d7c906779f1807",
+      "span_id": "784b26c1ca10d345"
+    }
   },
   "example_9": {
     "user_input": "Test configuration: 18 operators, 14 nurses, nurse consultations 15-25 minutes, normal demand",
@@ -851,88 +301,18 @@
       "04_nurse_util": 97.15170780690659,
       "05_callback_rate": 42.12121212121212
     },
-    "agent_run": {
-      "simulation_result": {
-        "01_mean_waiting_time": 0.08980920202587155,
-        "02_operator_util": 67.09751014731434,
-        "03_mean_nurse_waiting_time": 19.85524137214805,
-        "04_nurse_util": 97.15170780690659,
-        "05_callback_rate": 42.12121212121212
-      },
-      "meta": {
-        "retry_count": 0,
-        "had_bailout": false,
-        "validation_history": [
-          {
-            "attempt": 1,
-            "parameters": {
-              "n_operators": 18,
-              "n_nurses": 14,
-              "mean_iat": 0.6,
-              "call_low": 5.0,
-              "call_mode": 7.0,
-              "call_high": 10.0,
-              "callback_prob": 0.4,
-              "nurse_consult_low": 15.0,
-              "nurse_consult_high": 25.0,
-              "random_seed": 0,
-              "run_length": 1000
-            },
-            "validation_result": {
-              "is_valid": true,
-              "errors": []
-            }
-          }
-        ],
-        "parameters": {
-          "n_operators": 18,
-          "n_nurses": 14,
-          "mean_iat": 0.6,
-          "call_low": 5.0,
-          "call_mode": 7.0,
-          "call_high": 10.0,
-          "callback_prob": 0.4,
-          "nurse_consult_low": 15.0,
-          "nurse_consult_high": 25.0,
-          "random_seed": 0,
-          "run_length": 1000
-        },
-        "formatted_parameters": "**Parameters used in simulation**\n\n| \ud83d\udcc8 Parameter | Value |\n|---|---|\n| n_operators | 18 |\n| n_nurses | 14 |\n| mean_iat | 0.6 |\n| call_low | 5.0 |\n| call_mode | 7.0 |\n| call_high | 10.0 |\n| callback_prob | 0.4 |\n| nurse_consult_low | 15.0 |\n| nurse_consult_high | 25.0 |\n| random_seed | 0 |\n| run_length | 1000 |\n"
-      }
+    "agent_result": {
+      "01_mean_waiting_time": 0.08980920202587155,
+      "02_operator_util": 67.09751014731434,
+      "03_mean_nurse_waiting_time": 19.85524137214805,
+      "04_nurse_util": 97.15170780690659,
+      "05_callback_rate": 42.12121212121212
     },
-    "comparison": {
-      "pass": true,
-      "details": {
-        "01_mean_waiting_time": {
-          "expected": 0.08980920202587155,
-          "got": 0.08980920202587155,
-          "match": true
-        },
-        "02_operator_util": {
-          "expected": 67.09751014731434,
-          "got": 67.09751014731434,
-          "match": true
-        },
-        "03_mean_nurse_waiting_time": {
-          "expected": 19.85524137214805,
-          "got": 19.85524137214805,
-          "match": true
-        },
-        "04_nurse_util": {
-          "expected": 97.15170780690659,
-          "got": 97.15170780690659,
-          "match": true
-        },
-        "05_callback_rate": {
-          "expected": 42.12121212121212,
-          "got": 42.12121212121212,
-          "match": true
-        }
-      },
-      "rtol": 0.001,
-      "atol": 1e-06
-    },
-    "passed": true
+    "passed": true,
+    "context": {
+      "trace_id": "d8b2aedeb917ec4191b1c6a7fc467721",
+      "span_id": "14f5bf6c2a7008c2"
+    }
   },
   "example_10": {
     "user_input": "Simulate 12 operators, 10 nurses, 50% callback probability, and 40% demand reduction",
@@ -956,87 +336,17 @@
       "04_nurse_util": 90.70926116406883,
       "05_callback_rate": 51.4546965918537
     },
-    "agent_run": {
-      "simulation_result": {
-        "01_mean_waiting_time": 1.2583822886248166,
-        "02_operator_util": 84.9856571728051,
-        "03_mean_nurse_waiting_time": 46.17149830527762,
-        "04_nurse_util": 97.12003253429981,
-        "05_callback_rate": 50.43103448275862
-      },
-      "meta": {
-        "retry_count": 0,
-        "had_bailout": false,
-        "validation_history": [
-          {
-            "attempt": 1,
-            "parameters": {
-              "n_operators": 12,
-              "n_nurses": 10,
-              "mean_iat": 0.72,
-              "callback_prob": 0.5,
-              "call_low": 5.0,
-              "call_mode": 7.0,
-              "call_high": 10.0,
-              "nurse_consult_low": 10.0,
-              "nurse_consult_high": 20.0,
-              "random_seed": 0,
-              "run_length": 1000
-            },
-            "validation_result": {
-              "is_valid": true,
-              "errors": []
-            }
-          }
-        ],
-        "parameters": {
-          "n_operators": 12,
-          "n_nurses": 10,
-          "mean_iat": 0.72,
-          "callback_prob": 0.5,
-          "call_low": 5.0,
-          "call_mode": 7.0,
-          "call_high": 10.0,
-          "nurse_consult_low": 10.0,
-          "nurse_consult_high": 20.0,
-          "random_seed": 0,
-          "run_length": 1000
-        },
-        "formatted_parameters": "**Parameters used in simulation**\n\n| \ud83d\udcca Parameter | Value |\n|---|---|\n| n_operators | 12 |\n| n_nurses | 10 |\n| mean_iat | 0.72 |\n| callback_prob | 0.5 |\n| call_low | 5.0 |\n| call_mode | 7.0 |\n| call_high | 10.0 |\n| nurse_consult_low | 10.0 |\n| nurse_consult_high | 20.0 |\n| random_seed | 0 |\n| run_length | 1000 |\n"
-      }
+    "agent_result": {
+      "01_mean_waiting_time": 1.2583822886248166,
+      "02_operator_util": 84.9856571728051,
+      "03_mean_nurse_waiting_time": 46.17149830527762,
+      "04_nurse_util": 97.12003253429981,
+      "05_callback_rate": 50.43103448275862
     },
-    "comparison": {
-      "pass": false,
-      "details": {
-        "01_mean_waiting_time": {
-          "expected": 0.38280107383630124,
-          "got": 1.2583822886248166,
-          "match": false
-        },
-        "02_operator_util": {
-          "expected": 73.44752978233386,
-          "got": 84.9856571728051,
-          "match": false
-        },
-        "03_mean_nurse_waiting_time": {
-          "expected": 4.147154100012408,
-          "got": 46.17149830527762,
-          "match": false
-        },
-        "04_nurse_util": {
-          "expected": 90.70926116406883,
-          "got": 97.12003253429981,
-          "match": false
-        },
-        "05_callback_rate": {
-          "expected": 51.4546965918537,
-          "got": 50.43103448275862,
-          "match": false
-        }
-      },
-      "rtol": 0.001,
-      "atol": 1e-06
-    },
-    "passed": false
+    "passed": false,
+    "context": {
+      "trace_id": "38fc463cffe7950265a08d9e4f57c852",
+      "span_id": "910e28879b5d85b8"
+    }
   }
 }

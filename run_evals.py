@@ -1,157 +1,232 @@
 import asyncio
 import json
 import math
-from typing import Dict, Any, Tuple, Optional
+import pandas as pd
+import numpy as np
+from typing import Dict, Any, Optional
 
-# Import the agent builder and its dependencies from your agent module
-# Assumes agent_self_reflection.py exposes `build_graph`, `AgentState`, and a factory for the LLM.
 from agent_self_reflection import build_graph, AgentState
 from langchain_ollama import OllamaLLM
+from mcpsim.tracing import init_tracing
+import phoenix as px
+from phoenix.trace import SpanEvaluations
+
+import argparse
+import itertools
+
+# Import OpenTelemetry trace API to capture span context
+from opentelemetry import trace
+
+# Initialize a global tracer from your helper
+tracer_provider = init_tracing(project_name="mcp-agent-evaluation", endpoint="http://localhost:6006")
+tracer = tracer_provider.get_tracer("eval-runner-tracer")
 
 
+# ----------------- Comparison helpers (unchanged) -----------------
 def floats_close(a: Any, b: Any, rtol: float = 1e-3, atol: float = 1e-6) -> bool:
-    """
-    Compare numbers with tolerance, pass-through for non-numeric equality.
-    Returns True if both are NaN, or within tolerances for floats, or exactly equal otherwise.
-    """
-    # Handle None
-    if a is None or b is None:
-        return a is None and b is None
-
-    # Try numeric compare
+    if a is None or b is None: return a is None and b is None
     try:
-        fa = float(a)
-        fb = float(b)
-        # Handle NaNs
-        if math.isnan(fa) and math.isnan(fb):
-            return True
+        fa, fb = float(a), float(b)
+        if math.isnan(fa) and math.isnan(fb): return True
         return math.isclose(fa, fb, rel_tol=rtol, abs_tol=atol)
-    except (TypeError, ValueError):
-        # Non-numeric: exact equality
-        return a == b
-
+    except (TypeError, ValueError): return a == b
 
 def compare_results(
     got: Dict[str, Any],
     expected: Dict[str, Any],
     rtol: float = 1e-3,
-    atol: float = 1e-6,
-) -> Dict[str, Any]:
+    atol: float = 1e-6
+) -> bool:
+    """Compare two dictionaries of numerical simulation results.
+
+    This function provides a robust way to check if two dictionaries,
+    representing simulation outputs, are numerically equivalent within a
+    specified tolerance. It enforces that all metrics must be numeric
+    and that both dictionaries must have the exact same set of keys.
+
+    Parameters
+    ----------
+    got : dict
+        The dictionary of actual results obtained from a simulation run.
+        All values are expected to be numeric (int or float).
+    expected : dict
+        The dictionary of expected results to compare against.
+        All values are expected to be numeric (int or float).
+    rtol : float, optional
+        The relative tolerance parameter for `numpy.allclose`.
+        Default is 1e-3.
+    atol : float, optional
+        The absolute tolerance parameter for `numpy.allclose`.
+        Default is 1e-6.
+
+    Returns
+    -------
+    bool
+        True if the dictionaries are a match, False otherwise. A match
+        requires that:
+        1. Both dictionaries have the identical set of keys.
+        2. All values in both dictionaries are numeric.
+        3. All corresponding numeric values are close, as determined by
+           `numpy.allclose` with the given tolerances.
+
+    Examples
+    --------
+    >>> got = {'metric_a': 1.0001, 'metric_b': 200.0}
+    >>> expected = {'metric_a': 1.0, 'metric_b': 200.5}
+    >>> compare_results(got, expected, rtol=1e-2)
+    True
+
+    >>> got = {'metric_a': 1.01, 'metric_b': 200.0}
+    >>> expected = {'metric_a': 1.0, 'metric_b': 200.0}
+    >>> compare_results(got, expected, rtol=1e-3)
+    False
+
+    >>> got = {'metric_a': 1.0, 'metric_b': 'fail'}
+    >>> expected = {'metric_a': 1.0, 'metric_b': 2.0}
+    >>> compare_results(got, expected)
+    False
+
+    >>> got = {'metric_a': 1.0}
+    >>> expected = {'metric_a': 1.0, 'metric_b': 2.0}
+    >>> compare_results(got, expected)
+    False
     """
-    Compare simulation outputs to expected_results with numeric tolerance.
-    Returns a dict with per-key comparison, diffs, and overall pass flag.
+    if expected is None or got is None:
+        return False
+
+    s_got = pd.Series(got)
+    s_expected = pd.Series(expected)
+
+    # 1. Check for structural differences (different keys).
+    if set(s_got.index) != set(s_expected.index):
+        return False
+
+    # If both are empty but have same (no) keys, they match.
+    # if s_got.empty:
+    #     return True
+    
+    # 2. Verify that ALL values in BOTH series are numeric.
+    # pd.api.types.is_number is a robust way to check for int/float.
+    if not (s_got.apply(pd.api.types.is_number).all() and
+            s_expected.apply(pd.api.types.is_number).all()):
+        return False
+
+    # 3. Align and compare using NumPy's tolerance-based function.
+    # We already checked for key equality, so we can align `expected` to `got`.
+    s_expected_aligned = s_expected.loc[s_got.index]
+
+    # `np.allclose` is the gold standard for comparing arrays of floats.
+    return np.allclose(
+        s_got.values,
+        s_expected_aligned.values,
+        rtol=rtol,
+        atol=atol,
+        equal_nan=True  # Considers two NaN values to be equal.
+    )
+
+# ----------------- Agent run helpers (unchanged) -----------------
+async def run_agent_once(compiled_graph, user_input: str, llm: OllamaLLM) -> AgentState:
+    state_in: AgentState = {"user_input": user_input, "retry_count": 0, "validation_history": []}
+    return await compiled_graph.ainvoke(state_in)
+
+def extract_sim_result(state: AgentState) -> Optional[Dict[str, Any]]:
+    return state.get("simulation_result")
+
+# ---------------- UPDATED Bulk Ingest Function ----------------
+def bulk_ingest_to_phoenix(json_path: str, eval_name: str = "Simulation Agent Eval"):
     """
-    keys = sorted(set(got.keys()) | set(expected.keys()))
-    per_key = {}
-    all_pass = True
-
-    for k in keys:
-        g = got.get(k, None)
-        e = expected.get(k, None)
-        ok = floats_close(g, e, rtol=rtol, atol=atol)
-        if not ok:
-            all_pass = False
-        per_key[k] = {
-            "expected": e,
-            "got": g,
-            "match": ok,
-        }
-
-    return {
-        "pass": all_pass,
-        "details": per_key,
-        "rtol": rtol,
-        "atol": atol,
-    }
-
-
-async def run_agent_once(
-    compiled_graph,
-    user_input: str,
-    llm: OllamaLLM,
-    max_retries: int = 4,
-) -> Dict[str, Any]:
+    Loads an enriched evals.json file and bulk-ingests into Phoenix,
+    now including score, label, and explanation columns.
     """
-    Runs the agent end-to-end for a single natural-language user_input.
-    Returns the final state, including simulation_result or error.
-    """
-    state_in: AgentState = {
-        "user_input": user_input,
-        "retry_count": 0,
-        "validation_history": [],
-    }
-    final_state: AgentState = await compiled_graph.ainvoke(state_in)
-    return final_state
-
-
-def extract_agent_simulation_result(final_state: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Dict[str, Any]]:
-    """
-    Extract the simulation_result if present and return a compact agent_run summary
-    useful for evaluation logging.
-    """
-    sim_res = final_state.get("simulation_result")
-    agent_run = {
-        "retry_count": final_state.get("retry_count", 0),
-        "had_bailout": final_state.get("error") == "Maximum retries exceeded during parameter reflection.",
-        "validation_history": final_state.get("validation_history", []),
-        "parameters": final_state.get("parameters", {}),
-        "formatted_parameters": final_state.get("formatted_parameters", None),
-    }
-    return sim_res, agent_run
-
-
-async def main(
-    input_json_path: str = "evals/evals.json",
-    output_json_path: str = "evals/evals_output.json",
-    model_name: str = "gemma3:27b",
-    llm_base_url: str = "http://localhost:11434",
-    rtol: float = 1e-3,
-    atol: float = 1e-6,
-) -> None:
-    # 1) Load evals
-    with open(input_json_path, "r") as f:
+    with open(json_path, "r") as f:
         evals = json.load(f)
 
-    # 2) Build LLM and graph once
-    llm = OllamaLLM(model=model_name, base_url=llm_base_url)
+    eval_records = []
+    for ex_name, case in evals.items():
+        context = case.get("context")
+        if not context or "span_id" not in context or "trace_id" not in context:
+            print(f"⚠️ Skipping '{ex_name}': missing trace/span context in {json_path}")
+            continue
+
+        is_passed = bool(case.get("passed"))
+        
+        # **FIX:** Add all three required columns: score, label, and explanation.
+        eval_records.append({
+            "context.trace_id": context["trace_id"],
+            "context.span_id": context["span_id"],
+            "example_id": ex_name,
+            "score": 1 if is_passed else 0,
+            "label": "Pass" if is_passed else "Fail",
+            "explanation": "Agent result matched expected values within tolerance." if is_passed 
+                         else "Agent result did not match expected values.",
+        })
+
+    if not eval_records:
+        print("No valid records found to ingest. Did you run the agent first to generate evals.json?")
+        return
+        
+    eval_df = pd.DataFrame(eval_records)
+    eval_df = eval_df.set_index("context.span_id")
+
+    client = px.Client()
+    client.log_evaluations(SpanEvaluations(eval_name=eval_name, dataframe=eval_df))
+    print(f"[✓] Pushed {len(eval_df)} eval rows to Phoenix under '{eval_name}'")
+
+# ---------------- UPDATED Main eval runner ----------------
+async def run_all_and_save(model_name: str = "gemma3:27b", limit: int = None):
+    """
+    Runs the full evaluation pipeline and saves an enriched evals.json
+    that now includes the necessary trace/span context for Phoenix.
+    """
+    with open("evals/evals.json", "r") as f:
+        evals = json.load(f)
+
+    llm = OllamaLLM(model=model_name, base_url="http://localhost:11434")
     compiled_graph = build_graph(llm)
 
-    # 3) Run each eval in a loop via the agent
-    for key, case in evals.items():
-        user_input = case.get("user_input", "")
-        expected = case.get("parameters", {}).get("expected_results") or case.get("expected_results")
-        # In your earlier structure, expected_results is at the top level of each example after enrichment.
-        # If not present yet, this will remain None and comparison will be skipped.
+    # Use islice to limit the loop if a limit is provided
+    items_to_process = itertools.islice(evals.items(), limit) if limit else evals.items()
 
-        final_state = await run_agent_once(compiled_graph, user_input, llm)
-        sim_res, agent_run = extract_agent_simulation_result(final_state)
+    for ex_name, case in items_to_process:
+        # **FIX:** Create a parent span for each eval run to capture its context
+        with tracer.start_as_current_span(f"eval_run: {ex_name}") as span:
+            # Capture the context from the currently active span
+            span_context = span.get_span_context()
+            trace_id = f"{span_context.trace_id:032x}"
+            span_id = f"{span_context.span_id:016x}"
 
-        # Record agent run outputs
-        case["agent_run"] = {
-            "simulation_result": sim_res,
-            "meta": agent_run,
-        }
+            # Run the agent pipeline
+            final_state = await run_agent_once(compiled_graph, case["user_input"], llm)
+            
+            # Process results
+            got = extract_sim_result(final_state)
+            passed = compare_results(got, case.get("expected_results"))
 
-        # 4) Compare to expected_results if available
-        if expected is not None and sim_res is not None:
-            cmp = compare_results(sim_res, expected, rtol=rtol, atol=atol)
-            case["comparison"] = cmp
-            case["passed"] = bool(cmp["pass"])
-        else:
-            case["comparison"] = {
-                "note": "Either expected_results or agent simulation_result missing; comparison skipped."
-            }
-            case["passed"] = False if expected is not None else None
+            # Store results and the new context back into the dictionary
+            case["agent_result"] = got
+            case["passed"] = passed
+            case["context"] = {"trace_id": trace_id, "span_id": span_id}
+            
+            # Optionally add attributes to the span
+            span.set_attribute("eval.passed", passed)
+            span.set_attribute("eval.example_id", ex_name)
 
-    # 5) Save enriched evals to evals.json
-    with open(output_json_path, "w") as f:
+
+    with open("evals/evals_output.json", "w") as f:
         json.dump(evals, f, indent=2)
 
-    print(f"Wrote evaluation results to {output_json_path}")
-
+    print("[✓] Saved enriched evals.json with trace/span context.")
 
 if __name__ == "__main__":
-    # For CLI usage:
-    #   python eval_runner.py
-    # Optional: parameterize via env vars or argparse if desired.
-    asyncio.run(main())
+
+    parser = argparse.ArgumentParser(description="Run evals and/or bulk-ingest into Phoenix")
+    parser.add_argument("--skip-run", action="store_true", help="Skip agent runs and just bulk-ingest existing evals.json")
+    parser.add_argument("--eval-name", default="Simulation Agent Eval")
+    parser.add_argument("--limit", type=int, default=None, help="Limit the number of evaluations to run for debugging.")
+    args = parser.parse_args()
+
+    if args.skip_run:
+        bulk_ingest_to_phoenix("evals/evals_output.json", eval_name=args.eval_name)
+    else:
+        asyncio.run(run_all_and_save(model_name="gemma3:27b", limit=args.limit))
+        bulk_ingest_to_phoenix("evals/evals_output.json", eval_name=args.eval_name)

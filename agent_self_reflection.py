@@ -34,7 +34,7 @@ automatically handle parameter generation, validation, and execution.
 Hard constraints
 -------------
 MAX_RETRIES : int
-    Maximum number of parameter generation attempts before bailout (default: 4)
+    Maximum number of parameter generation attempts before bailout (default: mam4)
 
 Examples
 --------
