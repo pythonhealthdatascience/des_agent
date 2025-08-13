@@ -30,8 +30,8 @@
     },
     "passed": true,
     "context": {
-      "trace_id": "0934a40e20fdfe070060c5388c844116",
-      "span_id": "31ed66eb214272b6"
+      "trace_id": "05e9185a30490fa463f00ea5b0e65108",
+      "span_id": "39cfc1324c7aee19"
     }
   },
   "example_2": {
@@ -65,8 +65,8 @@
     },
     "passed": true,
     "context": {
-      "trace_id": "77ca44b81bf36c073755141a05677ead",
-      "span_id": "caec062bc22d0352"
+      "trace_id": "95fc97f63b485e37d20ada5d01b2acdb",
+      "span_id": "f66b8c36689fbdb2"
     }
   },
   "example_3": {
@@ -90,18 +90,6 @@
       "03_mean_nurse_waiting_time": 78.94431797274639,
       "04_nurse_util": 97.8390040780754,
       "05_callback_rate": 42.48847926267281
-    },
-    "agent_result": {
-      "01_mean_waiting_time": 242.69198606467467,
-      "02_operator_util": 99.35481108027054,
-      "03_mean_nurse_waiting_time": 78.94431797274639,
-      "04_nurse_util": 97.8390040780754,
-      "05_callback_rate": 42.48847926267281
-    },
-    "passed": true,
-    "context": {
-      "trace_id": "5f9634ef46fc071a31c5cf1110340b65",
-      "span_id": "e753ea4ba67d52a2"
     }
   },
   "example_4": {
@@ -125,18 +113,6 @@
       "03_mean_nurse_waiting_time": 0.0,
       "04_nurse_util": 35.17900361818962,
       "05_callback_rate": 42.17289719626168
-    },
-    "agent_result": {
-      "01_mean_waiting_time": 0.0,
-      "02_operator_util": 31.21492694742085,
-      "03_mean_nurse_waiting_time": 0.0,
-      "04_nurse_util": 35.17900361818962,
-      "05_callback_rate": 42.17289719626168
-    },
-    "passed": true,
-    "context": {
-      "trace_id": "00c51788956b474f796f4f43e50f83fe",
-      "span_id": "53ded666630ded84"
     }
   },
   "example_5": {
@@ -160,18 +136,6 @@
       "03_mean_nurse_waiting_time": 2.3551925550777337,
       "04_nurse_util": 82.46774067208518,
       "05_callback_rate": 33.012583271650634
-    },
-    "agent_result": {
-      "01_mean_waiting_time": 62.26336943615235,
-      "02_operator_util": 98.91827940297605,
-      "03_mean_nurse_waiting_time": 2.3551925550777337,
-      "04_nurse_util": 82.46774067208518,
-      "05_callback_rate": 33.012583271650634
-    },
-    "passed": true,
-    "context": {
-      "trace_id": "bf05c8a6a1ec39d65c9968fb83601548",
-      "span_id": "948c6aad19a4740b"
     }
   },
   "example_6": {
@@ -195,18 +159,6 @@
       "03_mean_nurse_waiting_time": 0.4505143843086236,
       "04_nurse_util": 83.59706413413956,
       "05_callback_rate": 41.69621749408983
-    },
-    "agent_result": {
-      "01_mean_waiting_time": 161.26826119772568,
-      "02_operator_util": 99.27336565709264,
-      "03_mean_nurse_waiting_time": 0.4505143843086236,
-      "04_nurse_util": 83.59706413413956,
-      "05_callback_rate": 41.69621749408983
-    },
-    "passed": true,
-    "context": {
-      "trace_id": "0ab69e3e17a7e78309b5fe6167ea5ca7",
-      "span_id": "ea7b6b1569d943e2"
     }
   },
   "example_7": {
@@ -230,18 +182,6 @@
       "03_mean_nurse_waiting_time": 2.663802537251699,
       "04_nurse_util": 86.43094276820304,
       "05_callback_rate": 41.684147437818396
-    },
-    "agent_result": {
-      "01_mean_waiting_time": 0.07192106569784922,
-      "02_operator_util": 66.74240386374329,
-      "03_mean_nurse_waiting_time": 2.663802537251699,
-      "04_nurse_util": 86.43094276820304,
-      "05_callback_rate": 41.684147437818396
-    },
-    "passed": true,
-    "context": {
-      "trace_id": "0f483bd78e24ae73065112e5d7a12b5a",
-      "span_id": "e1e58275b3473a9c"
     }
   },
   "example_8": {
@@ -265,18 +205,6 @@
       "03_mean_nurse_waiting_time": 196.98753442211358,
       "04_nurse_util": 97.69465771729217,
       "05_callback_rate": 57.87545787545788
-    },
-    "agent_result": {
-      "01_mean_waiting_time": 318.98668257451686,
-      "02_operator_util": 99.56949574531609,
-      "03_mean_nurse_waiting_time": 196.98753442211358,
-      "04_nurse_util": 97.69465771729217,
-      "05_callback_rate": 57.87545787545788
-    },
-    "passed": true,
-    "context": {
-      "trace_id": "df871b1e2f654ad8de10bbd51fbdaefe",
-      "span_id": "52f47e95d1fb0985"
     }
   },
   "example_9": {
@@ -300,18 +228,6 @@
       "03_mean_nurse_waiting_time": 19.85524137214805,
       "04_nurse_util": 97.15170780690659,
       "05_callback_rate": 42.12121212121212
-    },
-    "agent_result": {
-      "01_mean_waiting_time": 0.08980920202587155,
-      "02_operator_util": 67.09751014731434,
-      "03_mean_nurse_waiting_time": 19.85524137214805,
-      "04_nurse_util": 97.15170780690659,
-      "05_callback_rate": 42.12121212121212
-    },
-    "passed": true,
-    "context": {
-      "trace_id": "6d1203e63e2c1ffde945f0e20d33307f",
-      "span_id": "5b1a97dca34eaa49"
     }
   },
   "example_10": {
@@ -335,18 +251,6 @@
       "03_mean_nurse_waiting_time": 4.147154100012408,
       "04_nurse_util": 90.70926116406883,
       "05_callback_rate": 51.4546965918537
-    },
-    "agent_result": {
-      "01_mean_waiting_time": 0.38280107383630124,
-      "02_operator_util": 73.44752978233386,
-      "03_mean_nurse_waiting_time": 4.147154100012408,
-      "04_nurse_util": 90.70926116406883,
-      "05_callback_rate": 51.4546965918537
-    },
-    "passed": true,
-    "context": {
-      "trace_id": "4bce453daf28c8f5912d2c76c14d173d",
-      "span_id": "d1ad3e87babd3758"
     }
   }
 }
