@@ -1,6 +1,10 @@
 """
 Agent Self-Reflection Simulation Parameter Generator
 
+*****************
+WITH EVALS in arize-phoenix
+*****************
+
 This module implements an simple agent that generates and validates simulation 
 parameters using natural language input and self-reflection capabilities. The agent 
 employs a graph-based workflow to iteratively refine parameters until they meet 
@@ -34,7 +38,7 @@ automatically handle parameter generation, validation, and execution.
 Hard constraints
 -------------
 MAX_RETRIES : int
-    Maximum number of parameter generation attempts before bailout (default: mam4)
+    Maximum number of parameter generation attempts before bailout (default: 4)
 
 Examples
 --------
@@ -68,6 +72,23 @@ from functools import partial
 import pandas as pd
 
 import argparse
+
+import phoenix as px
+from phoenix.otel import register
+
+# used to annotate functions when tracing
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
+
+
+from mcpsim.tracing import init_tracing
+# Initialize tracing with the unified project name.
+tracer_provider = init_tracing(project_name="mcp-agent-evaluation")
+# Create a module-level tracer object.
+tracer = tracer_provider.get_tracer("langgraph-agent-tracer")
+
+import os
+
 
 console = Console()
 
@@ -103,6 +124,7 @@ class AgentState(TypedDict):
     validation_history: list 
     simulation_result: Optional[dict]
     retry_count: int  
+
 
 # --------------------------- Helper funcs ---------------------------------------- #
 def clean_llm_response(response: Optional[str]) -> str:
@@ -171,7 +193,6 @@ async def fetch_schema(state: Dict[str, Any]) -> Dict[str, Any]:
         state["schema"] = res[0].text if hasattr(res[0], "text") else res[0]
     return state
 
-
 async def generate_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str, Any]:
     async with Client("http://localhost:8001/mcp") as cl:
 
@@ -222,6 +243,7 @@ async def generate_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str
 
 
 async def validate_parameters(state: Dict[str, Any]) -> Dict[str, Any]:
+    
     async with Client("http://localhost:8001/mcp") as cl:
         resp = await cl.call_tool(
             "validate_simulation_parameters",
@@ -239,7 +261,9 @@ async def validate_parameters(state: Dict[str, Any]) -> Dict[str, Any]:
         "validation_result": resp.data.copy()
     })
 
-    state["validation"] = resp.data
+    result = resp.data
+    state["validation"] = result
+
     return state
 
 def validation_branch(state: Dict[str, Any]) -> str:
@@ -270,7 +294,6 @@ async def run_simulation(state: Dict[str, Any]) -> Dict[str, Any]:
         )
     state["simulation_result"] = resp.data
     return state
-
 
 async def summarise_parameters(state: Dict[str, Any], llm: OllamaLLM) -> Dict[str, Any]:
     """Generates a formatted markdown table of parameters from JSON. 
@@ -393,6 +416,10 @@ def display_validation_history(state: AgentState):
 
 async def main(model_name: str) -> None:
 
+    # 0. setup eval server
+    # tracer_provider = init_tracing(project_name="sim-agent-evaluation")
+    # tracer = tracer_provider.get_tracer("langgraph-agent-tracer")
+
     # 1. Setup the graph and LLM
     llm = OllamaLLM(model=model_name, base_url="http://localhost:11434")
     compiled_graph = build_graph(llm)
@@ -441,6 +468,8 @@ def parse_arguments():
     )
 
     return parser.parse_args()
+
+
 
 
 if __name__ == "__main__":

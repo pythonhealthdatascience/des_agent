@@ -129,7 +129,7 @@ This project was developed and tested on the following system configuration:
 
 1. **Start the MCP server**
    ```bash
-   python mcp_server.py
+   python run_call_centre_server.py
    ```
    Server will be available at `http://localhost:8001/mcp`
 

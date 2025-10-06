@@ -438,12 +438,13 @@ async def run_plan(
 
                 prompt = prompt_map[step_name]
                 # Most prompts need schema, user input
-                schema = memory.get("get_experiment_parameter_schema")
+                schema = memory.get("get_schema")
                 result = await client.get_prompt(
                     prompt.name, {"schema": schema, "user_input": user_input}
                 )
                 llm_prompt_text = result.messages[0].content.text
-                # Actually run LLM (synchronously!)
+
+                # run the prompt
                 llm_result = llm.invoke(llm_prompt_text)
                 parameters = json.loads(clean_llm_response(llm_result))
                 memory["parameters"] = parameters
@@ -551,7 +552,7 @@ async def main(
         transient=True,  # Removes progress bar after completion
     ) as progress:
         task = progress.add_task("executing", total=None)
-        memory = await run_plan(plan_steps, features, llm, user_input)
+        memory = await run_plan(plan_steps, features, llm, user_input, debug_mode)
         progress.remove_task(task)
 
     # 4. Results
